@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SportCare – Product Search</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <div class="brand">SportCare</div>
+
+        <div class="searchbox">
+          <input id="q" type="search" placeholder="Search (e.g., bullet, cannula, 1055…)" />
+          <button id="clearBtn" type="button">Clear</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container layout">
+      <aside class="filters">
+        <div class="filters-head">
+          <h2>Filters</h2>
+          <button id="resetBtn" type="button" class="linkbtn">Reset</button>
+        </div>
+
+        <section class="facet">
+          <h3>System</h3>
+          <div id="facetSystem" class="facet-list"></div>
+        </section>
+
+        <section class="facet">
+          <h3>Type</h3>
+          <div id="facetType" class="facet-list"></div>
+        </section>
+      </aside>
+
+      <section class="results">
+        <div class="results-head">
+          <div id="count" class="count"></div>
+          <select id="sort">
+            <option value="relevance">Sort: Relevance</option>
+            <option value="az">Sort: A → Z</option>
+            <option value="ref">Sort: Ref. Num.</option>
+          </select>
+        </div>
+
+        <div id="resultsList" class="results-list"></div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
