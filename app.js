@@ -1,9 +1,10 @@
 let ALL = [];
 let state = {
   q: "",
-  system: null,
-  type: null,
+  systems: new Set(),   // multi-select
+  types: new Set(),     // multi-select
   sort: "relevance",
+  lang: "en",
 };
 
 const elQ = document.getElementById("q");
@@ -14,6 +15,76 @@ const elFacetType = document.getElementById("facetType");
 const elResults = document.getElementById("resultsList");
 const elCount = document.getElementById("count");
 const elSort = document.getElementById("sort");
+const elLang = document.getElementById("langSelect");
+
+const elFiltersTitle = document.getElementById("filtersTitle");
+const elFacetSystemTitle = document.getElementById("facetSystemTitle");
+const elFacetTypeTitle = document.getElementById("facetTypeTitle");
+
+const I18N = {
+  en: {
+    searchPlaceholder: "Search (e.g., bullet, cannula, 1055…)",
+    clear: "Clear",
+    filters: "Filters",
+    reset: "Reset",
+    system: "System",
+    type: "Type",
+    sortRelevance: "Sort: Relevance",
+    sortAZ: "Sort: A → Z",
+    sortRef: "Sort: Ref. Num.",
+    noResults: "No results. Try a different term.",
+    resultCount: (n) => `${n} result${n === 1 ? "" : "s"}`,
+    metaRef: "Ref",
+  },
+  es: {
+    searchPlaceholder: "Buscar (ej.: bullet, cannula, 1055…)",
+    clear: "Limpiar",
+    filters: "Filtros",
+    reset: "Restablecer",
+    system: "Sistema",
+    type: "Tipo",
+    sortRelevance: "Orden: Relevancia",
+    sortAZ: "Orden: A → Z",
+    sortRef: "Orden: Núm. Ref.",
+    noResults: "Sin resultados. Prueba otro término.",
+    resultCount: (n) => `${n} resultado${n === 1 ? "" : "s"}`,
+    metaRef: "Ref",
+  },
+};
+
+// translate facet values (type)
+const TYPE_TRANSLATIONS = {
+  Guide: { es: "Guía", en: "Guide" },
+  Cannula: { es: "Cánula", en: "Cannula" },
+  Sleeve: { es: "Manga", en: "Sleeve" },
+  Hook: { es: "Gancho", en: "Hook" },
+  Driver: { es: "Destornillador", en: "Driver" },
+  Handle: { es: "Mango", en: "Handle" },
+  Drill: { es: "Broca", en: "Drill" },
+  Tap: { es: "Macho", en: "Tap" },
+  Screw: { es: "Tornillo", en: "Screw" },
+  Probe: { es: "Sonda", en: "Probe" },
+  Sizer: { es: "Medidor", en: "Sizer" },
+  Curette: { es: "Cureta", en: "Curette" },
+  Punch: { es: "Punzón", en: "Punch" },
+  Awl: { es: "Lezna", en: "Awl" },
+  Clamp: { es: "Pinza", en: "Clamp" },
+  Cutter: { es: "Cortador", en: "Cutter" },
+  Bullet: { es: "Bullet", en: "Bullet" },
+  Other: { es: "Otro", en: "Other" },
+};
+
+function t(key, ...args) {
+  const dict = I18N[state.lang] || I18N.en;
+  const val = dict[key];
+  return typeof val === "function" ? val(...args) : val ?? key;
+}
+
+function trType(typeVal) {
+  const row = TYPE_TRANSLATIONS[typeVal];
+  if (!row) return typeVal;
+  return row[state.lang] || typeVal;
+}
 
 function normalize(s) {
   return (s || "")
@@ -28,45 +99,22 @@ function scoreItem(item, qNorm) {
   if (text.includes(qNorm)) return 100;
   const tokens = qNorm.split(/\s+/).filter(Boolean);
   let score = 0;
-  for (const t of tokens) {
-    if (text.includes(t)) score += 20;
+  for (const tok of tokens) {
+    if (text.includes(tok)) score += 20;
   }
   return score;
-}
-
-function getFacets(items) {
-  const systems = new Map();
-  const types = new Map();
-  for (const it of items) {
-    systems.set(it.system, (systems.get(it.system) || 0) + 1);
-    types.set(it.type, (types.get(it.type) || 0) + 1);
-  }
-  return {
-    systems: [...systems.entries()].sort((a, b) => a[0].localeCompare(b[0])),
-    types: [...types.entries()].sort((a, b) => a[0].localeCompare(b[0])),
-  };
-}
-
-function renderFacet(container, entries, activeValue, onPick) {
-  container.innerHTML = "";
-  for (const [name, count] of entries) {
-    const div = document.createElement("div");
-    div.className = "facet-item" + (name === activeValue ? " active" : "");
-    div.innerHTML = `
-      <span class="name">${name}</span>
-      <span class="badge">${count}</span>
-    `;
-    div.addEventListener("click", () => onPick(name === activeValue ? null : name));
-    container.appendChild(div);
-  }
 }
 
 function applyFilters() {
   const qNorm = normalize(state.q.trim());
   let items = ALL;
 
-  if (state.system) items = items.filter((x) => x.system === state.system);
-  if (state.type) items = items.filter((x) => x.type === state.type);
+  if (state.systems.size) {
+    items = items.filter((x) => state.systems.has(x.system));
+  }
+  if (state.types.size) {
+    items = items.filter((x) => state.types.has(x.type));
+  }
 
   if (qNorm) {
     items = items
@@ -87,12 +135,60 @@ function applyFilters() {
   return items;
 }
 
+function facetCounts(baseItems) {
+  const sys = new Map();
+  const typ = new Map();
+  for (const it of baseItems) {
+    sys.set(it.system, (sys.get(it.system) || 0) + 1);
+    typ.set(it.type, (typ.get(it.type) || 0) + 1);
+  }
+  return {
+    systems: [...sys.entries()].sort((a,b)=>a[0].localeCompare(b[0])),
+    types: [...typ.entries()].sort((a,b)=>a[0].localeCompare(b[0])),
+  };
+}
+
+function renderCheckboxFacet(container, entries, selectedSet, onToggle, labelFn) {
+  container.innerHTML = "";
+  for (const [value, count] of entries) {
+    const id = `cb_${container.id}_${value}`.replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_]/g,"");
+    const row = document.createElement("label");
+    row.className = "facet-row";
+    row.setAttribute("for", id);
+
+    const left = document.createElement("div");
+    left.className = "facet-left";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.id = id;
+    cb.checked = selectedSet.has(value);
+    cb.addEventListener("change", () => onToggle(value, cb.checked));
+
+    const name = document.createElement("span");
+    name.className = "facet-name";
+    name.textContent = labelFn ? labelFn(value) : value;
+
+    const badge = document.createElement("span");
+    badge.className = "facet-badge";
+    badge.textContent = `${count}`;
+
+    left.appendChild(cb);
+    left.appendChild(name);
+
+    row.appendChild(left);
+    row.appendChild(badge);
+
+    container.appendChild(row);
+  }
+}
+
 function renderResults(items) {
-  elCount.textContent = `${items.length} result${items.length === 1 ? "" : "s"}`;
+  elCount.textContent = t("resultCount", items.length);
 
   elResults.innerHTML = "";
   if (!items.length) {
-    elResults.innerHTML = `<div class="result">No results. Try a different term.</div>`;
+    elResults.innerHTML = `<div class="result">${t("noResults")}</div>`;
     return;
   }
 
@@ -102,16 +198,43 @@ function renderResults(items) {
     row.innerHTML = `
       <a class="result-title" href="#" onclick="return false;">${it.description}</a>
       <div class="result-meta">
-        <span class="kv"><strong>Ref:</strong> ${it.ref_num}</span>
-        <span class="kv"><strong>System:</strong> ${it.system}</span>
-        <span class="kv"><strong>Type:</strong> ${it.type}</span>
+        <span class="kv"><strong>${t("metaRef")}:</strong> ${it.ref_num}</span>
+        <span class="kv"><strong>${t("system")}:</strong> ${it.system}</span>
+        <span class="kv"><strong>${t("type")}:</strong> ${trType(it.type)}</span>
       </div>
     `;
     elResults.appendChild(row);
   }
 }
 
+function applyI18nToUI() {
+  elQ.placeholder = t("searchPlaceholder");
+  elClear.textContent = t("clear");
+  elFiltersTitle.textContent = t("filters");
+  elReset.textContent = t("reset");
+  elFacetSystemTitle.textContent = t("system");
+  elFacetTypeTitle.textContent = t("type");
+
+  elSort.querySelector('option[value="relevance"]').textContent = t("sortRelevance");
+  elSort.querySelector('option[value="az"]').textContent = t("sortAZ");
+  elSort.querySelector('option[value="ref"]').textContent = t("sortRef");
+}
+
+function syncUrl() {
+  const params = new URLSearchParams();
+  if (state.q) params.set("q", state.q);
+  if (state.systems.size) params.set("system", [...state.systems].join("|"));
+  if (state.types.size) params.set("type", [...state.types].join("|"));
+  if (state.sort && state.sort !== "relevance") params.set("sort", state.sort);
+  if (state.lang && state.lang !== "en") params.set("lang", state.lang);
+
+  const qs = params.toString();
+  const newUrl = qs ? `${location.pathname}?${qs}` : `${location.pathname}`;
+  history.replaceState(null, "", newUrl);
+}
+
 function rerender() {
+  // Facet counts based on search-only base (keeps counts intuitive)
   const qNorm = normalize(state.q.trim());
   let base = ALL;
 
@@ -121,23 +244,35 @@ function rerender() {
       .filter((x) => x._score > 0);
   }
 
-  const facets = getFacets(base);
-  renderFacet(elFacetSystem, facets.systems, state.system, (v) => { state.system = v; syncUrl(); rerender(); });
-  renderFacet(elFacetType, facets.types, state.type, (v) => { state.type = v; syncUrl(); rerender(); });
+  const facets = facetCounts(base);
+
+  renderCheckboxFacet(
+    elFacetSystem,
+    facets.systems,
+    state.systems,
+    (value, checked) => {
+      if (checked) state.systems.add(value);
+      else state.systems.delete(value);
+      syncUrl();
+      rerender();
+    }
+  );
+
+  renderCheckboxFacet(
+    elFacetType,
+    facets.types,
+    state.types,
+    (value, checked) => {
+      if (checked) state.types.add(value);
+      else state.types.delete(value);
+      syncUrl();
+      rerender();
+    },
+    (v) => trType(v)
+  );
 
   const items = applyFilters();
   renderResults(items);
-}
-
-function syncUrl() {
-  const params = new URLSearchParams();
-  if (state.q) params.set("q", state.q);
-  if (state.system) params.set("system", state.system);
-  if (state.type) params.set("type", state.type);
-  if (state.sort && state.sort !== "relevance") params.set("sort", state.sort);
-  const qs = params.toString();
-  const newUrl = qs ? `${location.pathname}?${qs}` : `${location.pathname}`;
-  history.replaceState(null, "", newUrl);
 }
 
 function debounce(fn, ms=150){
@@ -148,6 +283,11 @@ function debounce(fn, ms=150){
   };
 }
 
+function parseMulti(paramVal) {
+  if (!paramVal) return [];
+  return String(paramVal).split("|").map(s=>s.trim()).filter(Boolean);
+}
+
 async function init() {
   const res = await fetch("./data/products.json");
   ALL = await res.json();
@@ -155,13 +295,18 @@ async function init() {
 
   const params = new URLSearchParams(location.search);
   state.q = params.get("q") || "";
-  state.system = params.get("system");
-  state.type = params.get("type");
   state.sort = params.get("sort") || "relevance";
+  state.lang = (params.get("lang") || "en").toLowerCase();
+  if (!I18N[state.lang]) state.lang = "en";
+
+  state.systems = new Set(parseMulti(params.get("system")));
+  state.types = new Set(parseMulti(params.get("type")));
 
   elQ.value = state.q;
   elSort.value = state.sort;
+  elLang.value = state.lang;
 
+  applyI18nToUI();
   rerender();
 }
 
@@ -179,14 +324,21 @@ elClear.addEventListener("click", () => {
 });
 
 elReset.addEventListener("click", () => {
-  state.system = null;
-  state.type = null;
+  state.systems = new Set();
+  state.types = new Set();
   syncUrl();
   rerender();
 });
 
 elSort.addEventListener("change", () => {
   state.sort = elSort.value;
+  syncUrl();
+  rerender();
+});
+
+elLang.addEventListener("change", () => {
+  state.lang = elLang.value;
+  applyI18nToUI();
   syncUrl();
   rerender();
 });

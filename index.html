@@ -13,8 +13,16 @@
         <div class="brand">SportCare</div>
 
         <div class="searchbox">
-          <input id="q" type="search" placeholder="Search (e.g., bullet, cannula, 1055…)" />
-          <button id="clearBtn" type="button">Clear</button>
+          <input id="q" type="search" placeholder="" />
+          <button id="clearBtn" type="button"></button>
+        </div>
+
+        <div class="lang">
+          <label class="lang-label" for="langSelect">Lang</label>
+          <select id="langSelect" aria-label="Language">
+            <option value="en">EN</option>
+            <option value="es">ES</option>
+          </select>
         </div>
       </div>
     </header>
@@ -22,17 +30,17 @@
     <main class="container layout">
       <aside class="filters">
         <div class="filters-head">
-          <h2>Filters</h2>
-          <button id="resetBtn" type="button" class="linkbtn">Reset</button>
+          <h2 id="filtersTitle"></h2>
+          <button id="resetBtn" type="button" class="linkbtn"></button>
         </div>
 
         <section class="facet">
-          <h3>System</h3>
+          <h3 id="facetSystemTitle"></h3>
           <div id="facetSystem" class="facet-list"></div>
         </section>
 
         <section class="facet">
-          <h3>Type</h3>
+          <h3 id="facetTypeTitle"></h3>
           <div id="facetType" class="facet-list"></div>
         </section>
       </aside>
@@ -40,10 +48,10 @@
       <section class="results">
         <div class="results-head">
           <div id="count" class="count"></div>
-          <select id="sort">
-            <option value="relevance">Sort: Relevance</option>
-            <option value="az">Sort: A → Z</option>
-            <option value="ref">Sort: Ref. Num.</option>
+          <select id="sort" aria-label="Sort">
+            <option value="relevance"></option>
+            <option value="az"></option>
+            <option value="ref"></option>
           </select>
         </div>
 

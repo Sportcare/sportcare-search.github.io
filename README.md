@@ -1,17 +1,9 @@
-# SportCare Search (Netlify Drop)
-This is a static prototype of an Arthrex-style catalog search page:
+# SportCare Search (Netlify Drop) – v2
+Static prototype of an Arthrex-style catalog search page:
 - Search bar
-- Left filters (facets)
+- Left filters with checkboxes (multi-select)
 - Results list
+- Language toggle EN/ES (adds `?lang=es` to URL)
 
-## How to test
-1. Drag-and-drop this folder's ZIP into Netlify "Deploy manually"
-2. Open the deployed site
-
-## Data
-`data/products.json` was generated from your CSV (45 items).
-Type facet is inferred from keywords in the description (Guide, Sleeve, Hook, etc.).
-# sportcare-search
-# sportcare-search
-# sportcare-search
-# sportcare-search
+## Test
+Drag-and-drop the ZIP into Netlify “Deploy manually”.
