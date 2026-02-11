@@ -168,10 +168,24 @@ function renderCheckboxFacet(container, entries, selectedSet, onToggle, labelFn,
   const { limit = 6, showAll = false } = opts || {};
   container.innerHTML = "";
 
-  const total = entries.length;
-  const shown = showAll ? entries : entries.slice(0, limit);
+  // Pin selected values to the top (while keeping stable ordering for the rest)
+  const selectedEntries = [];
+  const unselectedEntries = [];
+  for (const e of entries) {
+    const value = e[0];
+    if (selectedSet.has(value)) selectedEntries.push(e);
+    else unselectedEntries.push(e);
+  }
+  const ordered = selectedEntries.concat(unselectedEntries);
 
-  for (const [value, count] of shown) {
+  // When collapsed, always show ALL selected + as many unselected as fit in the limit
+  const visible = showAll
+    ? ordered
+    : selectedEntries.concat(unselectedEntries.slice(0, Math.max(0, limit - selectedEntries.length)));
+
+  const total = ordered.length;
+
+  for (const [value, count] of visible) {
     const id = `cb_${container.id}_${value}`.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "");
 
     const row = document.createElement("label");
@@ -184,7 +198,15 @@ function renderCheckboxFacet(container, entries, selectedSet, onToggle, labelFn,
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.id = id;
-    cb.checked = selectedSet.has(value);
+
+    const isSelected = selectedSet.has(value);
+    cb.checked = isSelected;
+
+    // Disable options with 0 results (but keep selected ones clickable so user can remove)
+    const isDisabled = (count === 0 && !isSelected);
+    cb.disabled = isDisabled;
+    if (isDisabled) { row.classList.add("facet-row--disabled"); row.setAttribute("aria-disabled","true"); }
+
     cb.addEventListener("change", () => onToggle(value, cb.checked));
 
     const name = document.createElement("span");
@@ -204,8 +226,9 @@ function renderCheckboxFacet(container, entries, selectedSet, onToggle, labelFn,
     container.appendChild(row);
   }
 
-  return { total, shownCount: shown.length };
+  return { total, shownCount: visible.length };
 }
+
 
 function renderPillbar() {
   elPillbar.innerHTML = "";

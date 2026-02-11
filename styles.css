@@ -156,3 +156,30 @@ body{margin:0;font-family:var(--font);color:var(--text);background:var(--bg)}
   .layout{grid-template-columns:1fr}
   .filters{border-right:none;padding-right:0;border-bottom:1px solid var(--line);padding-bottom:16px}
 }
+
+
+/* disabled facet option (0 results) */
+.facet-row--disabled{
+  opacity:.5;
+  background:#fafafa;
+}
+.facet-row--disabled:hover{background:#fafafa}
+.facet-row--disabled .facet-name{cursor:not-allowed}
+.facet-row--disabled input[type="checkbox"]{cursor:not-allowed}
+
+
+/* Arthrex-like muted count for disabled options */
+.facet-row--disabled .facet-badge{
+  color: #9a9a9a;
+}
+.facet-row--disabled{
+  border-color:#ededed;
+}
+
+.facet-row input[type="checkbox"]:disabled{
+  border-color:#d0d0d0;
+  box-shadow:none;
+}
+.facet-row input[type="checkbox"]:disabled::after{
+  background:#9a9a9a;
+}
