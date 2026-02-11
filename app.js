@@ -1,10 +1,11 @@
 let ALL = [];
 let state = {
   q: "",
-  systems: new Set(),   // multi-select
-  types: new Set(),     // multi-select
+  systems: new Set(),
+  types: new Set(),
   sort: "relevance",
   lang: "en",
+  showAll: { system: false, type: false },
 };
 
 const elQ = document.getElementById("q");
@@ -12,10 +13,13 @@ const elClear = document.getElementById("clearBtn");
 const elReset = document.getElementById("resetBtn");
 const elFacetSystem = document.getElementById("facetSystem");
 const elFacetType = document.getElementById("facetType");
+const elMoreSystem = document.getElementById("moreSystem");
+const elMoreType = document.getElementById("moreType");
 const elResults = document.getElementById("resultsList");
 const elCount = document.getElementById("count");
 const elSort = document.getElementById("sort");
 const elLang = document.getElementById("langSelect");
+const elPillbar = document.getElementById("pillbar");
 
 const elFiltersTitle = document.getElementById("filtersTitle");
 const elFacetSystemTitle = document.getElementById("facetSystemTitle");
@@ -35,6 +39,11 @@ const I18N = {
     noResults: "No results. Try a different term.",
     resultCount: (n) => `${n} result${n === 1 ? "" : "s"}`,
     metaRef: "Ref",
+    showMore: "Show more",
+    showLess: "Show less",
+    clearAll: "Clear all filters",
+    searchPill: (q) => `Search: “${q}”`,
+    remove: "Remove",
   },
   es: {
     searchPlaceholder: "Buscar (ej.: bullet, cannula, 1055…)",
@@ -49,10 +58,14 @@ const I18N = {
     noResults: "Sin resultados. Prueba otro término.",
     resultCount: (n) => `${n} resultado${n === 1 ? "" : "s"}`,
     metaRef: "Ref",
+    showMore: "Mostrar más",
+    showLess: "Mostrar menos",
+    clearAll: "Quitar filtros",
+    searchPill: (q) => `Búsqueda: “${q}”`,
+    remove: "Quitar",
   },
 };
 
-// translate facet values (type)
 const TYPE_TRANSLATIONS = {
   Guide: { es: "Guía", en: "Guide" },
   Cannula: { es: "Cánula", en: "Cannula" },
@@ -99,9 +112,7 @@ function scoreItem(item, qNorm) {
   if (text.includes(qNorm)) return 100;
   const tokens = qNorm.split(/\s+/).filter(Boolean);
   let score = 0;
-  for (const tok of tokens) {
-    if (text.includes(tok)) score += 20;
-  }
+  for (const tok of tokens) if (text.includes(tok)) score += 20;
   return score;
 }
 
@@ -109,12 +120,8 @@ function applyFilters() {
   const qNorm = normalize(state.q.trim());
   let items = ALL;
 
-  if (state.systems.size) {
-    items = items.filter((x) => state.systems.has(x.system));
-  }
-  if (state.types.size) {
-    items = items.filter((x) => state.types.has(x.type));
-  }
+  if (state.systems.size) items = items.filter((x) => state.systems.has(x.system));
+  if (state.types.size) items = items.filter((x) => state.types.has(x.type));
 
   if (qNorm) {
     items = items
@@ -124,13 +131,9 @@ function applyFilters() {
     items = items.map((x) => ({ ...x, _score: 0 }));
   }
 
-  if (state.sort === "az") {
-    items.sort((a, b) => a.description.localeCompare(b.description));
-  } else if (state.sort === "ref") {
-    items.sort((a, b) => String(a.ref_num).localeCompare(String(b.ref_num)));
-  } else {
-    items.sort((a, b) => (b._score - a._score) || a.description.localeCompare(b.description));
-  }
+  if (state.sort === "az") items.sort((a, b) => a.description.localeCompare(b.description));
+  else if (state.sort === "ref") items.sort((a, b) => String(a.ref_num).localeCompare(String(b.ref_num)));
+  else items.sort((a, b) => (b._score - a._score) || a.description.localeCompare(b.description));
 
   return items;
 }
@@ -143,15 +146,21 @@ function facetCounts(baseItems) {
     typ.set(it.type, (typ.get(it.type) || 0) + 1);
   }
   return {
-    systems: [...sys.entries()].sort((a,b)=>a[0].localeCompare(b[0])),
-    types: [...typ.entries()].sort((a,b)=>a[0].localeCompare(b[0])),
+    systems: [...sys.entries()].sort((a, b) => a[0].localeCompare(b[0])),
+    types: [...typ.entries()].sort((a, b) => a[0].localeCompare(b[0])),
   };
 }
 
-function renderCheckboxFacet(container, entries, selectedSet, onToggle, labelFn) {
+function renderCheckboxFacet(container, entries, selectedSet, onToggle, labelFn, opts) {
+  const { limit = 6, showAll = false } = opts || {};
   container.innerHTML = "";
-  for (const [value, count] of entries) {
-    const id = `cb_${container.id}_${value}`.replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_]/g,"");
+
+  const total = entries.length;
+  const shown = showAll ? entries : entries.slice(0, limit);
+
+  for (const [value, count] of shown) {
+    const id = `cb_${container.id}_${value}`.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "");
+
     const row = document.createElement("label");
     row.className = "facet-row";
     row.setAttribute("for", id);
@@ -180,6 +189,71 @@ function renderCheckboxFacet(container, entries, selectedSet, onToggle, labelFn)
     row.appendChild(badge);
 
     container.appendChild(row);
+  }
+
+  return { total, shownCount: shown.length };
+}
+
+function renderPillbar() {
+  elPillbar.innerHTML = "";
+
+  const pills = [];
+
+  if (state.q.trim()) {
+    pills.push({
+      label: t("searchPill", state.q.trim()),
+      clear: () => { state.q = ""; elQ.value = ""; },
+    });
+  }
+
+  for (const sys of [...state.systems]) {
+    pills.push({
+      label: `${t("system")}: ${sys}`,
+      clear: () => state.systems.delete(sys),
+    });
+  }
+
+  for (const typ of [...state.types]) {
+    pills.push({
+      label: `${t("type")}: ${trType(typ)}`,
+      clear: () => state.types.delete(typ),
+    });
+  }
+
+  if (pills.length) {
+    const clearAll = document.createElement("div");
+    clearAll.className = "pill primary";
+    clearAll.innerHTML = `<span>${t("clearAll")}</span>`;
+    const btn = document.createElement("button");
+    btn.className = "x";
+    btn.setAttribute("aria-label", t("clearAll"));
+    btn.textContent = "×";
+    btn.addEventListener("click", () => {
+      state.q = ""; elQ.value = "";
+      state.systems = new Set();
+      state.types = new Set();
+      syncUrl();
+      rerender();
+    });
+    clearAll.appendChild(btn);
+    elPillbar.appendChild(clearAll);
+  }
+
+  for (const p of pills) {
+    const div = document.createElement("div");
+    div.className = "pill";
+    div.innerHTML = `<span>${p.label}</span>`;
+    const x = document.createElement("button");
+    x.className = "x";
+    x.setAttribute("aria-label", t("remove"));
+    x.textContent = "×";
+    x.addEventListener("click", () => {
+      p.clear();
+      syncUrl();
+      rerender();
+    });
+    div.appendChild(x);
+    elPillbar.appendChild(div);
   }
 }
 
@@ -233,11 +307,25 @@ function syncUrl() {
   history.replaceState(null, "", newUrl);
 }
 
+function setupMoreButton(btn, total, shown, key) {
+  if (!btn) return;
+  if (total <= 6) {
+    btn.style.display = "none";
+    return;
+  }
+  btn.style.display = "inline-block";
+  btn.textContent = state.showAll[key] ? t("showLess") : t("showMore");
+  btn.onclick = () => {
+    state.showAll[key] = !state.showAll[key];
+    rerender();
+  };
+}
+
 function rerender() {
-  // Facet counts based on search-only base (keeps counts intuitive)
+  renderPillbar();
+
   const qNorm = normalize(state.q.trim());
   let base = ALL;
-
   if (qNorm) {
     base = base
       .map((x) => ({ ...x, _score: scoreItem(x, qNorm) }))
@@ -246,7 +334,7 @@ function rerender() {
 
   const facets = facetCounts(base);
 
-  renderCheckboxFacet(
+  const sysMeta = renderCheckboxFacet(
     elFacetSystem,
     facets.systems,
     state.systems,
@@ -255,10 +343,12 @@ function rerender() {
       else state.systems.delete(value);
       syncUrl();
       rerender();
-    }
+    },
+    (v) => v,
+    { limit: 6, showAll: state.showAll.system }
   );
 
-  renderCheckboxFacet(
+  const typMeta = renderCheckboxFacet(
     elFacetType,
     facets.types,
     state.types,
@@ -268,24 +358,30 @@ function rerender() {
       syncUrl();
       rerender();
     },
-    (v) => trType(v)
+    (v) => trType(v),
+    { limit: 6, showAll: state.showAll.type }
   );
+
+  setupMoreButton(elMoreSystem, sysMeta.total, sysMeta.shownCount, "system");
+  setupMoreButton(elMoreType, typMeta.total, typMeta.shownCount, "type");
 
   const items = applyFilters();
   renderResults(items);
+
+  renderPillbar();
 }
 
-function debounce(fn, ms=150){
-  let t;
+function debounce(fn, ms = 150) {
+  let tmr;
   return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(()=>fn(...args), ms);
+    clearTimeout(tmr);
+    tmr = setTimeout(() => fn(...args), ms);
   };
 }
 
 function parseMulti(paramVal) {
   if (!paramVal) return [];
-  return String(paramVal).split("|").map(s=>s.trim()).filter(Boolean);
+  return String(paramVal).split("|").map((s) => s.trim()).filter(Boolean);
 }
 
 async function init() {
@@ -326,6 +422,8 @@ elClear.addEventListener("click", () => {
 elReset.addEventListener("click", () => {
   state.systems = new Set();
   state.types = new Set();
+  state.q = "";
+  elQ.value = "";
   syncUrl();
   rerender();
 });

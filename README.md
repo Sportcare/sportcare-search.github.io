@@ -1,9 +1,6 @@
-# SportCare Search (Netlify Drop) – v2
-Static prototype of an Arthrex-style catalog search page:
-- Search bar
-- Left filters with checkboxes (multi-select)
-- Results list
-- Language toggle EN/ES (adds `?lang=es` to URL)
-
-## Test
-Drag-and-drop the ZIP into Netlify “Deploy manually”.
+# SportCare Search (Netlify Drop) – v3
+Upgrades included:
+- Show more / Show less for facets (when > 6 values)
+- Collapsible facet sections (accordion via <details>)
+- Pill bar above results with active filters + "Clear all filters"
+- Language toggle EN/ES and URL sync.
