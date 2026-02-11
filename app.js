@@ -121,6 +121,14 @@ function trType(typeVal) {
   return row[state.lang] || typeVal;
 }
 
+
+function displaySystemName(value){
+  // Keep internal value stable for filtering; change only what users see
+  if (value === "Expert ACL") return "Expert® – ACL/PCL";
+  return value;
+}
+
+
 function normalize(s) {
   return (s || "")
     .toLowerCase()
@@ -251,7 +259,7 @@ function renderPillbar() {
   }
 
   for (const sys of [...state.systems]) {
-    pills.push({ label: `${t("system")}: ${sys}`, clear: () => state.systems.delete(sys) });
+    pills.push({ label: `${t("system")}: ${displaySystemName(sys)}`, clear: () => state.systems.delete(sys) });
   }
 
   for (const typ of [...state.types]) {
@@ -319,7 +327,7 @@ function renderResults(items) {
         <a class="result-title" href="#" onclick="return false;">${it.description}</a>
         <div class="result-meta">
           <span class="kv"><strong>${t("metaRef")}:</strong> ${it.ref_num}</span>
-          <span class="kv"><strong>${t("system")}:</strong> ${it.system}</span>
+          <span class="kv"><strong>${t("system")}:</strong> ${displaySystemName(it.system)}</span>
           <span class="kv"><strong>${t("type")}:</strong> ${trType(it.type)}</span>
         </div>
       </div>
@@ -433,7 +441,7 @@ function rerender() {
       syncUrl();
       rerender();
     },
-    (v) => v,
+    (v) => displaySystemName(v),
     { limit: 6, showAll: state.showAll.system }
   );
 
