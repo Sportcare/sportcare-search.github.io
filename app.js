@@ -306,7 +306,7 @@ function renderResults(items) {
     const row = document.createElement("article");
     row.className = "result";
     row.innerHTML = `
-      <div class="result-thumb" aria-hidden="true"></div>
+      <div class="result-thumb" aria-hidden="true"><span class="thumb-text">Pending image</span></div>
       <div class="result-body">
         <a class="result-title" href="#" onclick="return false;">${it.description}</a>
         <div class="result-meta">

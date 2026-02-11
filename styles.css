@@ -450,3 +450,25 @@ label.facet-row{
 .filters h2{
   font-weight:400 !important;
 }
+
+
+/* Updated result thumbnail size and alignment */
+.result-thumb {
+  width: 120px !important;
+  height: 120px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Center body vertically relative to thumb */
+.result {
+  align-items: center !important;
+}
+
+/* Pending image placeholder text */
+.result-thumb .thumb-text {
+  color: var(--hintGray);
+  font-size: 13px; /* same as Clear all filters text */
+  text-align: center;
+}
