@@ -625,3 +625,90 @@ label.facet-row{
     order:4 !important;
   }
 }
+
+
+/* ===== Mobile advanced UX (no desktop impact) ===== */
+@media (max-width: 768px){
+  html, body{
+    overflow-x:hidden;
+  }
+
+  /* Ensure pills and selects never overflow */
+  .searchbox, .searchbox *{
+    max-width:100%;
+  }
+  .searchbox input{
+    min-width:0;
+  }
+  #langSelect, #sort, .morebtn, .searchbox button, .linkbtn{
+    max-width: 100%;
+  }
+
+  /* Mobile container spacing */
+  .container{
+    padding-left:18px !important;
+    padding-right:18px !important;
+  }
+
+  /* Make layout a single column and reorder: Search -> Results -> Filters */
+  main.container.layout{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:14px !important;
+  }
+
+  /* The relocated searchbox lives here */
+  #mobileSearchMount .searchbox{
+    width:100%;
+    margin: 0 0 6px 0 !important;
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    padding: 10px 0;
+    background: var(--bgPage);
+  }
+
+  /* Hint right under search (kept in flow) */
+  .hint{
+    margin: 0 0 8px 0 !important;
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Results above filters */
+  .results{ order: 2 !important; }
+  aside.filters{ order: 3 !important; }
+
+  /* Mobile tools bar (Show Filters button) */
+  .mobile-tools{
+    order: 1 !important;
+    display:flex;
+    justify-content:flex-end;
+    margin-top:-6px;
+    margin-bottom:6px;
+  }
+
+  /* Collapsed filters state */
+  body.filters-collapsed aside.filters{
+    display:none !important;
+  }
+
+  /* Make results comfortable */
+  .results{
+    padding:14px !important;
+    border-radius:14px;
+  }
+  .result{
+    gap:12px !important;
+  }
+  .result-thumb{
+    width:96px !important;
+    height:96px !important;
+  }
+
+  /* Font size adjustments */
+  .result-title{ font-size: 15px !important; }
+  .result-meta{ font-size: 12px !important; }
+  .filters h2{ font-size: 14px !important; }
+  .acc summary{ font-size: 13px !important; }
+}
