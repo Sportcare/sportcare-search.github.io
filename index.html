@@ -13,6 +13,7 @@
         <div class="brand"><img src="img/logo-sportcare-web.png" alt="" style="max-width: 70%; min-width: 100px;"></div>
 
         <div class="searchbox">
+          <div id="suggestions" class="suggestions" hidden></div>
           <input id="q" type="search" placeholder="" />
           <button id="clearBtn" type="button"></button>
         </div>
@@ -45,6 +46,13 @@
               <span class="chev">▾</span>
             </div>
           </summary>
+          <div class="facet-controls">
+            <div class="facet-search-wrap"><input id="facetSystemSearch" class="facet-search" type="search" placeholder="" /><button class="facet-search-clear" type="button" aria-label="clear">×</button></div>
+            <label class="facet-toggle">
+              <input id="facetSystemShow0" type="checkbox" />
+              <span class="facet-toggle-text"></span>
+            </label>
+          </div>
           <div id="facetSystem" class="facet-list"></div>
           <button id="moreSystem" class="morebtn" type="button"></button>
         </details>
@@ -60,6 +68,13 @@
               <span class="chev">▾</span>
             </div>
           </summary>
+          <div class="facet-controls">
+            <div class="facet-search-wrap"><input id="facetTypeSearch" class="facet-search" type="search" placeholder="" /><button class="facet-search-clear" type="button" aria-label="clear">×</button></div>
+            <label class="facet-toggle">
+              <input id="facetTypeShow0" type="checkbox" />
+              <span class="facet-toggle-text"></span>
+            </label>
+          </div>
           <div id="facetType" class="facet-list"></div>
           <button id="moreType" class="morebtn" type="button"></button>
         </details>
@@ -67,6 +82,10 @@
 
       <section class="results">
         <div class="results-head">
+          <div id="loadingIndicator" class="loading" aria-live="polite" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="loading-text"></span>
+          </div>
           <div id="count" class="count"></div>
 
           <select id="sort" aria-label="Sort">
