@@ -327,3 +327,42 @@ body{ background: var(--bgPage); }
   font-family: var(--pill-font);
   font-weight: 600;
 }
+
+
+/* Make Reset button match pill UI like Show less */
+.linkbtn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  background: var(--pill-bg);
+  color: var(--pill-text) !important;
+  padding: 0.55rem 1.0rem;
+  border-radius: var(--pill-radius);
+  text-decoration: none;
+  font-weight: 600;
+  font-family: var(--pill-font);
+  transition: all 0.3s ease;
+  box-shadow: var(--pill-shadow);
+}
+
+/* Hover effect for reset */
+.linkbtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.14);
+}
+
+
+/* Remove blue highlight outlines */
+*:focus,
+*:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+/* Facet box background similar to Expert ACL */
+.acc,
+.facet,
+.filters {
+  background: #F0F0F0 !important;
+}
