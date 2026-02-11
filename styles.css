@@ -275,7 +275,7 @@ body{margin:0;font-family:var(--font);color:var(--text);background:var(--bg)}
 }
 
 
-/* top search suggestions (web pages) */
+/* Search suggestions dropdown (web pages) */
 .searchbox{ position:relative; }
 .suggestions{
   position:absolute;
