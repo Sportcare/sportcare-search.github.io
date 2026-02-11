@@ -35,6 +35,7 @@ const elPillbar = document.getElementById("pillbar");
 const elLoading = document.getElementById("loadingIndicator");
 const elLoadingText = elLoading ? elLoading.querySelector(".loading-text") : null;
 const elResultsSection = document.querySelector(".results");
+const elSuggestions = document.getElementById("suggestions");
 
 const elFiltersTitle = document.getElementById("filtersTitle");
 const elFacetSystemTitle = document.getElementById("facetSystemTitle");
@@ -682,45 +683,45 @@ elQ.addEventListener("input", debounce(async () => {
   state.q = elQ.value || "";
   syncUrl();
 
+  // Autocomplete pages (webpages)
   const pages = await loadPages();
   const q = (state.q || "").trim();
-  const filtered = pages.filter(p => normalize(p.title).includes(normalize(q)) || normalize(p.url).includes(normalize(q)));
-  renderSuggestions(filtered, q);
+  const qn = normalize(q);
+  const filteredPages = q ? pages.filter(p => normalize(p.title).includes(qn) || normalize(p.url).includes(qn) || normalize(p.subtitle || "").includes(qn)) : [];
+  renderSuggestions(filteredPages, q);
 
-  // Only render product results when user searches (existing behavior). Keep debounced server-like feel.
+  // Render product results (debounced, server-like)
   scheduleRender();
 }, 220));
-
 
 elQ.addEventListener("keydown", async (e) => {
   if (!elSuggestions || elSuggestions.hidden) return;
 
   const pages = await loadPages();
   const q = (state.q || "").trim();
-  const filtered = pages.filter(p => normalize(p.title).includes(normalize(q)) || normalize(p.url).includes(normalize(q)));
-
+  const qn = normalize(q);
+  const filtered = q ? pages.filter(p => normalize(p.title).includes(qn) || normalize(p.url).includes(qn) || normalize(p.subtitle || "").includes(qn)) : [];
   const itemsCount = Math.min(filtered.length, 8);
   if (!itemsCount) return;
 
-  if (e.key === "ArrowDown"){
+  if (e.key === "ArrowDown") {
     e.preventDefault();
     const next = _sugActive < 0 ? 0 : Math.min(itemsCount - 1, _sugActive + 1);
     setActiveSuggestion(next);
-  } else if (e.key === "ArrowUp"){
+  } else if (e.key === "ArrowUp") {
     e.preventDefault();
     const prev = _sugActive <= 0 ? (itemsCount - 1) : (_sugActive - 1);
     setActiveSuggestion(prev);
-  } else if (e.key === "Enter"){
-    if (_sugActive >= 0){
+  } else if (e.key === "Enter") {
+    if (_sugActive >= 0) {
       e.preventDefault();
       openSuggestion(filtered, _sugActive);
     }
-  } else if (e.key === "Escape"){
+  } else if (e.key === "Escape") {
     elSuggestions.hidden = true;
   }
 });
-  scheduleRender();
-}, 180));
+
 
 elClear.addEventListener("click", () => {
   elQ.value = "";
