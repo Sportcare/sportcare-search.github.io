@@ -666,3 +666,10 @@ label.facet-row{
     gap: 10px;
   }
 }
+
+
+/* Mobile search mount hidden on desktop */
+.mobile-search-mount{ display:none; }
+@media (max-width: 768px){
+  .mobile-search-mount{ display:block; }
+}

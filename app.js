@@ -470,28 +470,36 @@ function isMobileViewport(){
 let _searchboxPlaceholder = null;
 let _searchboxOriginalParent = null;
 
+
 function applyMobileSearchPlacement(){
   const mount = document.getElementById("mobileSearchMount");
   const searchbox = document.querySelector(".searchbox");
   if (!mount || !searchbox) return;
 
-  if (!_searchboxPlaceholder){
-    _searchboxPlaceholder = document.createElement("div");
-    _searchboxPlaceholder.id = "searchboxPlaceholder";
-    _searchboxOriginalParent = searchbox.parentElement;
-    _searchboxOriginalParent.insertBefore(_searchboxPlaceholder, searchbox);
-  }
+  const mobile = isMobileViewport();
 
-  if (isMobileViewport()){
+  if (mobile){
+    // Create placeholder only when we actually move (keeps desktop flex clean)
+    if (!_searchboxPlaceholder){
+      _searchboxPlaceholder = document.createElement("div");
+      _searchboxPlaceholder.id = "searchboxPlaceholder";
+      _searchboxPlaceholder.style.display = "none";
+      _searchboxOriginalParent = searchbox.parentElement;
+      _searchboxOriginalParent.insertBefore(_searchboxPlaceholder, searchbox);
+    }
     if (!mount.contains(searchbox)){
       mount.appendChild(searchbox);
     }
   } else {
-    if (_searchboxPlaceholder && _searchboxPlaceholder.parentElement && !_searchboxPlaceholder.parentElement.contains(searchbox)){
+    // Restore only if placeholder exists (meaning we moved at least once)
+    if (_searchboxPlaceholder && _searchboxPlaceholder.parentElement){
       _searchboxPlaceholder.parentElement.insertBefore(searchbox, _searchboxPlaceholder);
+      _searchboxPlaceholder.remove();
+      _searchboxPlaceholder = null;
     }
   }
 }
+
 
 
 function parseMulti(paramVal) {
