@@ -321,15 +321,6 @@ function renderResults(items) {
 }
 
 function applyI18nToUI() {
-  const mobileToggle = document.getElementById('mobileFiltersToggle');
-  const setMobileToggleLabel = () => {
-    if (!mobileToggle) return;
-    const collapsed = document.body.classList.contains('filters-collapsed');
-    if (state.lang === 'es') mobileToggle.textContent = collapsed ? 'Mostrar filtros' : 'Ocultar filtros';
-    else mobileToggle.textContent = collapsed ? 'Show Filters' : 'Hide Filters';
-  };
-  setMobileToggleLabel();
-
   elQ.placeholder = t("searchPlaceholder");
   elClear.textContent = t("clear");
   elFiltersTitle.textContent = t("filters");
@@ -476,61 +467,7 @@ function parseMulti(paramVal) {
   return String(paramVal).split("|").map((s) => s.trim()).filter(Boolean);
 }
 
-async 
-
-function isMobile(){
-  return window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
-}
-
-let _searchboxHome = null; // placeholder in topbar to restore
-let _searchboxParent = null;
-
-function applyMobileLayout(){
-  const mount = document.getElementById("mobileSearchMount");
-  const tools = document.getElementById("mobileResultsTools");
-  const toggleBtn = document.getElementById("mobileFiltersToggle");
-  const topbarInner = document.querySelector(".topbar-inner");
-  const searchbox = document.querySelector(".searchbox");
-  if (!mount || !topbarInner || !searchbox) return;
-
-  // Create a placeholder in the topbar where searchbox used to live
-  if (!_searchboxHome){
-    _searchboxHome = document.createElement("div");
-    _searchboxHome.id = "searchboxHome";
-    _searchboxParent = searchbox.parentElement;
-    _searchboxParent.insertBefore(_searchboxHome, searchbox);
-  }
-
-  if (isMobile()){
-    // Move searchbox under main layout
-    if (!mount.contains(searchbox)){
-      mount.appendChild(searchbox);
-    }
-
-    // Show mobile tools (Show Filters)
-    if (tools) tools.hidden = false;
-
-    // Collapse filters by default on mobile
-    document.body.classList.add("filters-collapsed");
-    if (toggleBtn){
-      toggleBtn.textContent = (state.lang === 'es') ? (document.body.classList.contains('filters-collapsed') ? 'Mostrar filtros' : 'Ocultar filtros') : (document.body.classList.contains('filters-collapsed') ? 'Show Filters' : 'Hide Filters');
-      toggleBtn.onclick = () => {
-        document.body.classList.toggle("filters-collapsed");
-        toggleBtn.textContent = (state.lang === 'es') ? (document.body.classList.contains('filters-collapsed') ? 'Mostrar filtros' : 'Ocultar filtros') : (document.body.classList.contains('filters-collapsed') ? 'Show Filters' : 'Hide Filters');
-      };
-    }
-  } else {
-    // Restore searchbox back into the topbar
-    if (_searchboxHome && _searchboxHome.parentElement && !topbarInner.contains(searchbox)){
-      _searchboxHome.parentElement.insertBefore(searchbox, _searchboxHome);
-    }
-    if (tools) tools.hidden = true;
-    document.body.classList.remove("filters-collapsed");
-  }
-}
-
-
-function init() {
+async function init() {
   const res = await fetch("./data/products.json");
   ALL = await res.json();
   ALL = ALL.map((x) => ({ ...x, _searchNorm: normalize(`${x._search}`) }));
@@ -553,8 +490,6 @@ function init() {
   elLang.value = state.lang;
 
   applyI18nToUI();
-  applyMobileLayout();
-  window.addEventListener('resize', debounce(applyMobileLayout, 150));
   rerender();
 
   // persist accordion state on toggle
@@ -593,8 +528,6 @@ elSort.addEventListener("change", () => {
 elLang.addEventListener("change", () => {
   state.lang = elLang.value;
   applyI18nToUI();
-  applyMobileLayout();
-  window.addEventListener('resize', debounce(applyMobileLayout, 150));
   syncUrl();
   rerender();
 });
