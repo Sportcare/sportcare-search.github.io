@@ -983,3 +983,10 @@ label.facet-row{
     border-radius: 999px;
   }
 }
+
+
+
+/* Specific fix for Done button margin */
+button#mobileFiltersApply.morebtn{
+  margin-top: 0 !important;
+}
