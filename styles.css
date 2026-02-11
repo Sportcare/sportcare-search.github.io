@@ -541,3 +541,55 @@ label.facet-row{
     width: 190px;
   }
 }
+
+
+
+/* ===== Mobile spacing improvements (no desktop impact) ===== */
+@media (max-width: 768px){
+  /* global safe padding */
+  .container{
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  /* topbar contents */
+  .topbar-inner{
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  /* main layout breathing room */
+  main.container.layout{
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  /* when layout stacks, avoid edge hugging */
+  .layout{
+    gap: 16px !important;
+  }
+
+  /* filters panel padding */
+  aside.filters{
+    padding: 14px !important;
+    border-radius: 14px;
+  }
+
+  /* results panel */
+  .results{
+    padding: 14px !important;
+    border-radius: 14px;
+  }
+
+  /* result rows */
+  .result{
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  /* brochure footer section */
+  .brochure-footer{
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+}
