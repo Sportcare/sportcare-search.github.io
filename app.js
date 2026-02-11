@@ -6,8 +6,6 @@ let state = {
   sort: "relevance",
   lang: "en",
   showAll: { system: false, type: false },
-  facetSearch: { system: "", type: "" },
-  showZero: { system: false, type: false },
 };
 
 const elQ = document.getElementById("q");
@@ -17,21 +15,11 @@ const elFacetSystem = document.getElementById("facetSystem");
 const elFacetType = document.getElementById("facetType");
 const elMoreSystem = document.getElementById("moreSystem");
 const elMoreType = document.getElementById("moreType");
-const elFacetSystemSearch = document.getElementById("facetSystemSearch");
-const elFacetTypeSearch = document.getElementById("facetTypeSearch");
-const elFacetSystemShow0 = document.getElementById("facetSystemShow0");
-const elFacetTypeShow0 = document.getElementById("facetTypeShow0");
-const elFacetSystemSearchClear = document.querySelector("#facetSystemSearch")?.parentElement?.querySelector(".facet-search-clear");
-const elFacetTypeSearchClear = document.querySelector("#facetTypeSearch")?.parentElement?.querySelector(".facet-search-clear");
-
 const elResults = document.getElementById("resultsList");
 const elCount = document.getElementById("count");
 const elSort = document.getElementById("sort");
 const elLang = document.getElementById("langSelect");
 const elPillbar = document.getElementById("pillbar");
-const elLoading = document.getElementById("loadingIndicator");
-const elLoadingText = elLoading ? elLoading.querySelector(".loading-text") : null;
-const elResultsSection = document.querySelector(".results");
 
 const elFiltersTitle = document.getElementById("filtersTitle");
 const elFacetSystemTitle = document.getElementById("facetSystemTitle");
@@ -125,29 +113,6 @@ function trType(typeVal) {
   return row[state.lang] || typeVal;
 }
 
-function escapeHtml(str){
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-function highlightText(label, query){
-  if (!query) return escapeHtml(label);
-  const q = String(query).trim();
-  if (!q) return escapeHtml(label);
-  const lower = String(label).toLowerCase();
-  const ql = q.toLowerCase();
-  const idx = lower.indexOf(ql);
-  if (idx === -1) return escapeHtml(label);
-  const before = escapeHtml(label.slice(0, idx));
-  const mid = escapeHtml(label.slice(idx, idx + q.length));
-  const after = escapeHtml(label.slice(idx + q.length));
-  return `${before}<mark>${mid}</mark>${after}`;
-}
-
 function normalize(s) {
   return (s || "")
     .toLowerCase()
@@ -199,77 +164,6 @@ function facetCounts(baseItems) {
   };
 }
 
-
-function filterBySearch(items) {
-  const qNorm = normalize(state.q.trim());
-  if (!qNorm) return items;
-  return items
-    .map((x) => ({ ...x, _score: scoreItem(x, qNorm) }))
-    .filter((x) => x._score > 0);
-}
-
-function uniqueValues(items, key) {
-  const set = new Set();
-  for (const it of items) set.add(it[key]);
-  return [...set].sort((a, b) => String(a).localeCompare(String(b)));
-}
-
-/**
- * Returns entries [value, count] for a facet with "dynamic" counts:
- * - counts reflect current selections in OTHER facets (and search term if present)
- * - options with 0 can be included (or hidden) via state.showZero[facetKey]
- * - selected values are always included
- */
-function computeFacetEntries(facetKey, universeOnly = false) {
-  // Universe: values that exist under current SEARCH only (so irrelevant values don't show up)
-  let universeBase = filterBySearch(ALL);
-  const universeVals = uniqueValues(universeBase, facetKey);
-
-  // Base for counts: apply OTHER facet selections (excluding this facet's own selection)
-  let base = universeBase;
-  if (facetKey === "system") {
-    if (state.types.size) base = base.filter((x) => state.types.has(x.type));
-  } else if (facetKey === "type") {
-    if (state.systems.size) base = base.filter((x) => state.systems.has(x.system));
-  }
-
-  const counts = new Map();
-  for (const v of universeVals) counts.set(v, 0);
-  for (const it of base) {
-    const v = it[facetKey];
-    counts.set(v, (counts.get(v) || 0) + 1);
-  }
-
-  let entries = universeVals.map((v) => [v, counts.get(v) || 0]);
-
-  if (universeOnly) return entries;
-
-  // Apply "search within facet"
-  const q = normalize(state.facetSearch?.[facetKey] || "");
-  if (q) {
-    entries = entries.filter(([v]) => {
-      const raw = normalize(String(v));
-      if (raw.includes(q)) return true;
-      if (facetKey === "type") {
-        const tr = normalize(String(trType(v)));
-        return tr.includes(q);
-      }
-      return false;
-    });
-  }
-
-  // Hide 0-count options unless toggled on (selected values always stay visible)
-  const show0 = !!state.showZero?.[facetKey];
-  if (!show0) {
-    entries = entries.filter(([v, c]) => {
-      if (c > 0) return true;
-      return facetKey === "system" ? state.systems.has(v) : state.types.has(v);
-    });
-  }
-
-  return entries;
-}
-
 function renderCheckboxFacet(container, entries, selectedSet, onToggle, labelFn, opts) {
   const { limit = 6, showAll = false } = opts || {};
   container.innerHTML = "";
@@ -317,10 +211,7 @@ function renderCheckboxFacet(container, entries, selectedSet, onToggle, labelFn,
 
     const name = document.createElement("span");
     name.className = "facet-name";
-    const rawLabel = labelFn ? labelFn(value) : value;
-    const facetKey = container.id === "facetSystem" ? "system" : (container.id === "facetType" ? "type" : "");
-    const q = facetKey ? (state.facetSearch?.[facetKey] || "") : "";
-    name.innerHTML = highlightText(String(rawLabel), q);
+    name.textContent = labelFn ? labelFn(value) : value;
 
     const badge = document.createElement("span");
     badge.className = "facet-badge";
@@ -336,36 +227,6 @@ function renderCheckboxFacet(container, entries, selectedSet, onToggle, labelFn,
   }
 
   return { total, shownCount: visible.length };
-}
-
-function setupFacetKeyboardNav(container){
-  if (!container) return;
-  container.addEventListener("keydown", (e) => {
-    const keys = ["ArrowDown","ArrowUp","Home","End"];
-    if (!keys.includes(e.key)) return;
-
-    const active = document.activeElement;
-    if (!active || active.tagName !== "INPUT" || active.type !== "checkbox") return;
-    if (!container.contains(active)) return;
-
-    const boxes = Array.from(container.querySelectorAll('input[type="checkbox"]'))
-      .filter(cb => !cb.disabled);
-
-    if (!boxes.length) return;
-
-    const idx = boxes.indexOf(active);
-    let next = idx;
-
-    if (e.key === "ArrowDown") next = Math.min(boxes.length - 1, idx + 1);
-    else if (e.key === "ArrowUp") next = Math.max(0, idx - 1);
-    else if (e.key === "Home") next = 0;
-    else if (e.key === "End") next = boxes.length - 1;
-
-    if (next !== idx) {
-      e.preventDefault();
-      boxes[next].focus();
-    }
-  });
 }
 
 
@@ -402,8 +263,8 @@ function renderPillbar() {
       state.systems = new Set();
       state.types = new Set();
       syncUrl();
-      scheduleRender();
-});
+      rerender();
+    });
     clearAll.appendChild(btn);
     elPillbar.appendChild(clearAll);
   }
@@ -419,8 +280,8 @@ function renderPillbar() {
     x.addEventListener("click", () => {
       p.clear();
       syncUrl();
-      scheduleRender();
-});
+      rerender();
+    });
     div.appendChild(x);
     elPillbar.appendChild(div);
   }
@@ -467,13 +328,6 @@ function applyI18nToUI() {
   elSort.querySelector('option[value="relevance"]').textContent = t("sortRelevance");
   elSort.querySelector('option[value="az"]').textContent = t("sortAZ");
   elSort.querySelector('option[value="ref"]').textContent = t("sortRef");
-
-  if (elFacetSystemSearch) elFacetSystemSearch.placeholder = t("facetSearchPlaceholder");
-  if (elFacetTypeSearch) elFacetTypeSearch.placeholder = t("facetSearchPlaceholder");
-  const sysTextEl = elFacetSystemShow0 ? elFacetSystemShow0.parentElement?.querySelector(".facet-toggle-text") : null;
-  const typeTextEl = elFacetTypeShow0 ? elFacetTypeShow0.parentElement?.querySelector(".facet-toggle-text") : null;
-  if (sysTextEl) sysTextEl.textContent = t("showUnavailable");
-  if (typeTextEl) typeTextEl.textContent = t("showUnavailable");
 }
 
 function persistAccordions() {
@@ -530,48 +384,58 @@ function setupMoreButton(btn, total, shown, key) {
   btn.textContent = state.showAll[key] ? t("showLess") : t("showMore");
   btn.onclick = () => {
     state.showAll[key] = !state.showAll[key];
-    scheduleRender();
-};
+    rerender();
+  };
 }
 
-function updateAccordionHeaderBadges(sysEntries, typeEntries, sysUniverse, typeUniverse) {
+function updateAccordionHeaderBadges(facetSystemsTotal, facetTypesTotal) {
+  // "Type (2)" and total options badge
   elFacetSystemSelected.textContent = t("selectedN", state.systems.size);
   elFacetTypeSelected.textContent = t("selectedN", state.types.size);
 
-  // Show available / total like (4 / 12)
-  elFacetSystemTotal.textContent = `${sysEntries} / ${sysUniverse}`;
-  elFacetTypeTotal.textContent = `${typeEntries} / ${typeUniverse}`;
+  elFacetSystemTotal.textContent = String(facetSystemsTotal);
+  elFacetTypeTotal.textContent = String(facetTypesTotal);
 }
 
 function rerender() {
   renderPillbar();
 
-  // Facets: dynamic counts based on search + current selections (other facets)
+  // Facets: counts based on search-only base. If no search, show counts from ALL.
+  const qNorm = normalize(state.q.trim());
+  let base = ALL;
+
+  if (qNorm) {
+    base = base
+      .map((x) => ({ ...x, _score: scoreItem(x, qNorm) }))
+      .filter((x) => x._score > 0);
+  }
+
+  const facets = facetCounts(base);
 
   const sysMeta = renderCheckboxFacet(
     elFacetSystem,
-    computeFacetEntries("system"),
+    facets.systems,
     state.systems,
     (value, checked) => {
       if (checked) state.systems.add(value);
       else state.systems.delete(value);
       syncUrl();
-      scheduleRender();
-},
+      rerender();
+    },
     (v) => v,
     { limit: 6, showAll: state.showAll.system }
   );
 
   const typMeta = renderCheckboxFacet(
     elFacetType,
-    computeFacetEntries("type"),
+    facets.types,
     state.types,
     (value, checked) => {
       if (checked) state.types.add(value);
       else state.types.delete(value);
       syncUrl();
-      scheduleRender();
-},
+      rerender();
+    },
     (v) => trType(v),
     { limit: 6, showAll: state.showAll.type }
   );
@@ -586,39 +450,6 @@ function rerender() {
 
   renderPillbar();
 }
-
-
-let _renderTimer = null;
-let _loadingOffTimer = null;
-
-function setLoading(isLoading){
-  if (!elLoading || !elResultsSection) return;
-  if (isLoading){
-    elLoading.hidden = false;
-    if (elLoadingText) elLoadingText.textContent = t("loadingText");
-    elResultsSection.classList.add("is-loading");
-  } else {
-    elLoading.hidden = true;
-    elResultsSection.classList.remove("is-loading");
-  }
-}
-
-// Debounced, server-like render.
-// - Shows loading immediately
-// - Waits a short delay to simulate server response
-function scheduleRender(delayMs = 220){
-  if (_renderTimer) clearTimeout(_renderTimer);
-  if (_loadingOffTimer) clearTimeout(_loadingOffTimer);
-
-  setLoading(true);
-
-  _renderTimer = setTimeout(() => {
-    rerender();
-    // keep spinner visible for a tiny moment so it feels like a real fetch
-    _loadingOffTimer = setTimeout(() => setLoading(false), 120);
-  }, delayMs);
-}
-
 
 function debounce(fn, ms = 150) {
   let tmr;
@@ -651,26 +482,14 @@ async function init() {
   state.systems = new Set(parseMulti(params.get("system")));
   state.types = new Set(parseMulti(params.get("type")));
 
-  // facet controls
-  state.showZero.system = (params.get("show0System") || "0") === "1";
-  state.showZero.type = (params.get("show0Type") || "0") === "1";
-
-
   elQ.value = state.q;
   elSort.value = state.sort;
   elLang.value = state.lang;
 
-  if (elFacetSystemShow0) elFacetSystemShow0.checked = state.showZero.system;
-  if (elFacetTypeShow0) elFacetTypeShow0.checked = state.showZero.type;
-  if (elFacetSystemSearch) elFacetSystemSearch.value = state.facetSearch.system;
-  if (elFacetTypeSearch) elFacetTypeSearch.value = state.facetSearch.type;
-
-
   applyI18nToUI();
-  setupFacetKeyboardNav(elFacetSystem);
-  setupFacetKeyboardNav(elFacetType);
-  scheduleRender();
-// persist accordion state on toggle
+  rerender();
+
+  // persist accordion state on toggle
   if (accSystem) accSystem.addEventListener("toggle", () => { persistAccordions(); syncUrl(); });
   if (accType) accType.addEventListener("toggle", () => { persistAccordions(); syncUrl(); });
 }
@@ -678,14 +497,14 @@ async function init() {
 elQ.addEventListener("input", debounce(() => {
   state.q = elQ.value;
   syncUrl();
-  scheduleRender();
+  rerender();
 }, 180));
 
 elClear.addEventListener("click", () => {
   elQ.value = "";
   state.q = "";
   syncUrl();
-  scheduleRender();
+  rerender();
 });
 
 elReset.addEventListener("click", () => {
@@ -694,47 +513,20 @@ elReset.addEventListener("click", () => {
   state.q = "";
   elQ.value = "";
   syncUrl();
-  scheduleRender();
+  rerender();
 });
 
 elSort.addEventListener("change", () => {
   state.sort = elSort.value;
   syncUrl();
-  scheduleRender();
+  rerender();
 });
-
-if (elFacetSystemSearch) {
-  elFacetSystemSearch.addEventListener("input", debounce(() => {
-    state.facetSearch.system = elFacetSystemSearch.value || "";
-    scheduleRender();
-}, 120));
-}
-if (elFacetTypeSearch) {
-  elFacetTypeSearch.addEventListener("input", debounce(() => {
-    state.facetSearch.type = elFacetTypeSearch.value || "";
-    scheduleRender();
-}, 120));
-}
-if (elFacetSystemShow0) {
-  elFacetSystemShow0.addEventListener("change", () => {
-    state.showZero.system = !!elFacetSystemShow0.checked;
-    syncUrl();
-    scheduleRender();
-});
-}
-if (elFacetTypeShow0) {
-  elFacetTypeShow0.addEventListener("change", () => {
-    state.showZero.type = !!elFacetTypeShow0.checked;
-    syncUrl();
-    scheduleRender();
-});
-}
 
 elLang.addEventListener("change", () => {
   state.lang = elLang.value;
   applyI18nToUI();
   syncUrl();
-  scheduleRender();
+  rerender();
 });
 
 init();
