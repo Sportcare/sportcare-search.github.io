@@ -894,39 +894,32 @@ label.facet-row{
 }
 
 
-
-/* ===== Place Filters button inline next to Sort on mobile ===== */
+/* ===== Filters button next to Sort on mobile (no desktop impact) ===== */
 @media (max-width: 900px){
-  /* Disable floating FAB positioning */
-  .mobile-fab{
-    position: static !important;
-    margin-left: 8px;
-    box-shadow: none;
+  /* Make results head a tidy toolbar */
+  .results-head{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:flex-end !important;
+    gap:10px;
   }
 
-  /* Inline container next to sort/lang controls */
-  .mobile-filters-inline{
+  /* Move count to the left if needed */
+  .results-head .count{
+    margin-right:auto;
+  }
+
+  .mobile-filters-sort-mount{
     display:inline-flex;
     align-items:center;
   }
 
-  /* Ensure sort + filters stay on same row */
-  .lang{
-    display:flex !important;
-    align-items:center !important;
-    gap:8px;
-  }
-}
-
-
-/* ===== Mobile inline Filters button fix ===== */
-@media (max-width: 900px){
-  .mobile-filters-inline{ display:inline-flex; align-items:center; }
-  #mobileFiltersToolbarMount .mobile-fab{
+  /* When the FAB is mounted here, it must look like a normal pill button */
+  #mobileFiltersSortMount .mobile-fab{
     position: static !important;
-    right:auto !important;
-    bottom:auto !important;
-    margin: 0 8px 0 0 !important; /* left of sort */
+    right: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
     box-shadow: var(--pill-shadow, 0 4px 10px rgba(0,0,0,0.1)) !important;
   }
 }

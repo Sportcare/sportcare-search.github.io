@@ -517,6 +517,7 @@ function applyMobileFiltersDrawer(){
   const drawer = document.getElementById("mobileFiltersDrawer");
   const overlay = document.getElementById("mobileFiltersOverlay");
   const mount = document.getElementById("mobileFiltersMount");
+  const sortMount = document.getElementById("mobileFiltersSortMount");
   const filters = document.querySelector("aside.filters");
   const closeBtn = document.getElementById("mobileFiltersClose");
   const doneBtn = document.getElementById("mobileFiltersApply");
@@ -525,7 +526,6 @@ function applyMobileFiltersDrawer(){
   if (!filters || !mount || !fab || !drawer) return;
 
   if (isMob){
-    const toolbarMount = document.getElementById('mobileFiltersToolbarMount');
     // create placeholder at original location once
     if (!_filtersPlaceholder){
       _filtersPlaceholder = document.createElement("div");
@@ -537,12 +537,12 @@ function applyMobileFiltersDrawer(){
       mount.appendChild(filters);
     }
 
-    // Move the Filters button next to Sort on mobile
-    if (toolbarMount && !toolbarMount.contains(fab)){
-      toolbarMount.appendChild(fab);
-    }
-
     fab.hidden = false;
+
+    // Place Filters button next to Sort on mobile
+    if (sortMount && !sortMount.contains(fab)){
+      sortMount.appendChild(fab);
+    }
     // labels
     const title = drawer.querySelector(".mobile-drawer-title");
     if (title) title.textContent = t("filters");
@@ -585,7 +585,6 @@ function applyMobileFiltersDrawer(){
 
     if (fab){
       fab.hidden = true;
-      // Restore fab to body so it doesn't stay in navbar on desktop
       if (!document.body.contains(fab)) document.body.appendChild(fab);
     }
     closeMobileFilters();
