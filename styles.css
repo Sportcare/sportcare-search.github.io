@@ -825,3 +825,17 @@ label.facet-row{
     flex:1;
   }
 }
+
+
+
+/* ===== Mobile drawer fix: hide sidebar on page, show inside drawer ===== */
+@media (max-width: 900px){
+  /* Hide filters in normal page flow (covers any DOM nesting) */
+  aside.filters{
+    display:none !important;
+  }
+  /* But show filters once mounted inside the drawer */
+  #mobileFiltersDrawer aside.filters{
+    display:block !important;
+  }
+}
