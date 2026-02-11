@@ -673,3 +673,26 @@ label.facet-row{
 @media (max-width: 768px){
   .mobile-search-mount{ display:block; }
 }
+
+
+
+/* ===== Mobile tweaks: Lang right + swap Results/Filters (no desktop impact) ===== */
+@media (max-width: 768px){
+  /* Keep brand left and lang right in navbar */
+  .topbar-inner{
+    flex-wrap: nowrap !important;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .brand{ flex: 1 1 auto; min-width: 0; }
+  .lang{
+    margin-left: auto;
+    width: auto !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+  }
+
+  /* Swap sections: Results above Filters */
+  .results{ order: 2 !important; }
+  aside.filters{ order: 3 !important; }
+}
