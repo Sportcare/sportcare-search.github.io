@@ -593,3 +593,35 @@ label.facet-row{
     padding-right: 18px !important;
   }
 }
+
+
+
+/* ===== Mobile layout reorder (no desktop impact) ===== */
+@media (max-width: 768px){
+
+  /* Make main layout stack in custom order */
+  main.container.layout{
+    display:flex !important;
+    flex-direction:column !important;
+  }
+
+  /* Order elements */
+  .searchbox{
+    order:1 !important;
+    margin-bottom:12px !important;
+  }
+
+  .hint{
+    order:2 !important;
+    margin:10px 0 14px 0 !important;
+    padding:10px 12px !important;
+  }
+
+  aside.filters{
+    order:3 !important;
+  }
+
+  .results{
+    order:4 !important;
+  }
+}
