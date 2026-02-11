@@ -217,13 +217,6 @@ body{ background: var(--bgPage); }
   color: var(--hintGray);
 }
 
-/* Separator lines: SportCare yellow + 3px */
-.topbar{ border-bottom: 3px solid var(--sep) !important; }
-.results-head{ border-bottom: 3px solid var(--sep) !important; }
-.result{ border-bottom: 3px solid var(--sep) !important; }
-.filters{ border-right: 3px solid var(--sep) !important; }
-.acc{ border-bottom: 3px solid var(--sep) !important; }
-
 /* Result card layout with image placeholder */
 .result{
   display:flex;
@@ -239,3 +232,10 @@ body{ background: var(--bgPage); }
   flex:0 0 auto;
 }
 .result-body{ flex:1; min-width:0; }
+
+
+
+/* Keep original separators everywhere except the one under Sort dropdown */
+.results-head{
+  border-bottom: 3px solid #FFC400 !important;
+}
