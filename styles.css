@@ -923,3 +923,19 @@ label.facet-row{
     box-shadow: var(--pill-shadow, 0 4px 10px rgba(0,0,0,0.1)) !important;
   }
 }
+
+
+
+/* ===== Mobile-specific text and size updates ===== */
+@media (max-width: 900px){
+
+  /* Result title larger on mobile */
+  .result-title{
+    font-size: large !important;
+  }
+
+  /* Logo smaller in navbar on mobile */
+  .brand img{
+    max-width: 50% !important;
+  }
+}
