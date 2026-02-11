@@ -676,23 +676,31 @@ label.facet-row{
 
 
 
-/* ===== Mobile tweaks: Lang right + swap Results/Filters (no desktop impact) ===== */
-@media (max-width: 768px){
-  /* Keep brand left and lang right in navbar */
+/* ===== Mobile tweaks v2: keep Lang inline right + swap Results/Filters (no desktop impact) ===== */
+@media (max-width: 900px){
+  /* NAV: force one row: Brand left, Lang right */
   .topbar-inner{
     flex-wrap: nowrap !important;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: space-between !important;
+    align-items: center !important;
   }
-  .brand{ flex: 1 1 auto; min-width: 0; }
-  .lang{
-    margin-left: auto;
+  .topbar-inner .brand{
+    white-space: nowrap;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .topbar-inner .lang{
+    margin-left: auto !important;
     width: auto !important;
     justify-content: flex-end !important;
     flex-wrap: nowrap !important;
   }
 
-  /* Swap sections: Results above Filters */
-  .results{ order: 2 !important; }
-  aside.filters{ order: 3 !important; }
+  /* MAIN: when it becomes flex column on mobile, put results above filters */
+  main.container.layout{
+    display:flex !important;
+    flex-direction: column !important;
+  }
+  main.container.layout > .results{ order: 2 !important; }
+  main.container.layout > aside.filters{ order: 3 !important; }
 }
