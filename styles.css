@@ -861,3 +861,34 @@ label.facet-row{
     padding-bottom: 18px;
   }
 }
+
+
+
+/* ===== Mobile drawer visibility + redundancy fixes ===== */
+@media (max-width: 900px){
+  /* Respect the hidden attribute (previous display:block overrode it) */
+  .mobile-overlay[hidden],
+  .mobile-drawer[hidden],
+  .mobile-fab[hidden]{
+    display:none !important;
+  }
+
+  /* Drawer should only appear after tapping the Filters FAB */
+  .mobile-overlay{ display:block; }
+  .mobile-drawer{ display:block; }
+
+  /* Avoid duplicate "Filter by:" title (drawer already has one) */
+  #mobileFiltersDrawer .filters h2{
+    display:none !important;
+  }
+
+  /* Footer buttons centered */
+  .mobile-drawer-foot{
+    justify-content:center !important;
+  }
+  .mobile-drawer-foot .linkbtn,
+  .mobile-drawer-foot .morebtn{
+    flex: 1 1 0;
+    max-width: 240px;
+  }
+}
