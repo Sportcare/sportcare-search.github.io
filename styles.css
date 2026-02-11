@@ -183,3 +183,59 @@ body{margin:0;font-family:var(--font);color:var(--text);background:var(--bg)}
 .facet-row input[type="checkbox"]:disabled::after{
   background:#9a9a9a;
 }
+
+
+
+/* ===== SportCare UI tweaks (v2 baseline styling pass) ===== */
+:root{
+  --bgPage: #dee2e2;
+  --sep: #FFC400;
+  --hintGray: #9aa1a1;
+}
+
+/* Page background (keep navbar white) */
+body{ background: var(--bgPage); }
+
+/* Navbar typography: Roboto Condensed Semibold */
+.topbar, .topbar *{
+  font-family: "Roboto Condensed", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  font-weight: 600;
+}
+
+/* Keep placeholder NOT in Roboto Condensed (use default UI font) + make it subtle */
+.searchbox input::placeholder{
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  font-weight: 400;
+  color: var(--hintGray);
+  opacity: 1;
+  font-size: 13px;
+}
+
+/* Smaller, more gray hint */
+.hint{
+  font-size: 13px;
+  color: var(--hintGray);
+}
+
+/* Separator lines: SportCare yellow + 3px */
+.topbar{ border-bottom: 3px solid var(--sep) !important; }
+.results-head{ border-bottom: 3px solid var(--sep) !important; }
+.result{ border-bottom: 3px solid var(--sep) !important; }
+.filters{ border-right: 3px solid var(--sep) !important; }
+.acc{ border-bottom: 3px solid var(--sep) !important; }
+
+/* Result card layout with image placeholder */
+.result{
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+}
+.result-thumb{
+  width:64px;
+  height:64px;
+  border:1px solid var(--sep);
+  border-radius:10px;
+  background:#fff;
+  flex:0 0 auto;
+}
+.result-body{ flex:1; min-width:0; }

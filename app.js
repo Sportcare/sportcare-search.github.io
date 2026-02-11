@@ -37,7 +37,7 @@ const STORAGE_KEY = "sportcare_search_v4";
 
 const I18N = {
   en: {
-    searchPlaceholder: "Type to search (e.g., bullet, cannula, 1055…)",
+    searchPlaceholder: "Type to search (e.g., SKU, retroknife, canulla, 1055...)",
     clear: "Clear",
     filters: "Filters",
     reset: "Reset",
@@ -306,11 +306,14 @@ function renderResults(items) {
     const row = document.createElement("article");
     row.className = "result";
     row.innerHTML = `
-      <a class="result-title" href="#" onclick="return false;">${it.description}</a>
-      <div class="result-meta">
-        <span class="kv"><strong>${t("metaRef")}:</strong> ${it.ref_num}</span>
-        <span class="kv"><strong>${t("system")}:</strong> ${it.system}</span>
-        <span class="kv"><strong>${t("type")}:</strong> ${trType(it.type)}</span>
+      <div class="result-thumb" aria-hidden="true"></div>
+      <div class="result-body">
+        <a class="result-title" href="#" onclick="return false;">${it.description}</a>
+        <div class="result-meta">
+          <span class="kv"><strong>${t("metaRef")}:</strong> ${it.ref_num}</span>
+          <span class="kv"><strong>${t("system")}:</strong> ${it.system}</span>
+          <span class="kv"><strong>${t("type")}:</strong> ${trType(it.type)}</span>
+        </div>
       </div>
     `;
     elResults.appendChild(row);
