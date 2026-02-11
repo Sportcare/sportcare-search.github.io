@@ -939,3 +939,47 @@ label.facet-row{
     max-width: 50% !important;
   }
 }
+
+
+/* ===== Hint: text-only (no box) ===== */
+.hint{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+
+/* ===== Mobile drawer footer buttons centered ===== */
+@media (max-width: 900px){
+  .mobile-drawer-foot{
+    justify-content: center !important;
+  }
+  .mobile-drawer-foot .linkbtn,
+  .mobile-drawer-foot .morebtn{
+    max-width: 220px;
+    flex: 1 1 0;
+  }
+}
+
+
+/* ===== Mobile drawer head/foot background + X close ===== */
+@media (max-width: 900px){
+  .mobile-drawer-head,
+  .mobile-drawer-foot{
+    background: #DEE2E2 !important;
+  }
+
+  /* Make close look like an icon button */
+  .mobile-drawer-close{
+    font-size: 22px;
+    line-height: 1;
+    width: 40px;
+    height: 40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius: 999px;
+  }
+}
