@@ -239,3 +239,91 @@ body{ background: var(--bgPage); }
 .results-head{
   border-bottom: 3px solid #FFC400 !important;
 }
+
+
+
+/* ===== Yellow pill button style (catalog-like) ===== */
+:root{
+  --pill-bg: #f7c948;
+  --pill-text: #222222;
+  --pill-shadow: 0 4px 10px rgba(0,0,0,0.10);
+  --pill-radius: 999px;
+  --pill-font: "elza-text", sans-serif;
+}
+
+/* Shared look for action buttons and dropdowns */
+.pill-ui,
+.morebtn,
+.searchbox button,
+#langSelect,
+#sort{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  background: var(--pill-bg);
+  color: var(--pill-text);
+  padding: 0.55rem 1.0rem; /* adapted for existing sizes */
+  border-radius: var(--pill-radius);
+  text-decoration: none;
+  font-weight: 600;
+  font-family: var(--pill-font);
+  transition: all 0.3s ease;
+  box-shadow: var(--pill-shadow);
+  border: 0;
+}
+
+/* Keep dropdown arrow visible + sizing */
+#langSelect,
+#sort{
+  padding-right: 2.0rem;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--pill-text) 50%),
+    linear-gradient(135deg, var(--pill-text) 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px),
+    calc(100% - 2.2rem) 0.6rem;
+  background-size:
+    6px 6px,
+    6px 6px,
+    1px 1.6rem;
+  background-repeat: no-repeat;
+}
+
+/* Hover / focus */
+.morebtn:hover,
+.searchbox button:hover,
+#langSelect:hover,
+#sort:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.14);
+}
+.morebtn:active,
+.searchbox button:active{
+  transform: translateY(0px);
+}
+
+/* Make the Clear (x) button still compact */
+.searchbox button{
+  padding: 0.55rem 1.0rem;
+  min-width: 44px;
+}
+
+/* Reset link color */
+.linkbtn{
+  color: #222222 !important;
+  font-family: var(--pill-font);
+  font-weight: 600;
+}
+
+/* Lang label color */
+.lang-label{
+  color: #0a0a0a99 !important;
+  font-family: var(--pill-font);
+  font-weight: 600;
+}
