@@ -917,3 +917,16 @@ label.facet-row{
     gap:8px;
   }
 }
+
+
+/* ===== Mobile inline Filters button fix ===== */
+@media (max-width: 900px){
+  .mobile-filters-inline{ display:inline-flex; align-items:center; }
+  #mobileFiltersToolbarMount .mobile-fab{
+    position: static !important;
+    right:auto !important;
+    bottom:auto !important;
+    margin: 0 8px 0 0 !important; /* left of sort */
+    box-shadow: var(--pill-shadow, 0 4px 10px rgba(0,0,0,0.1)) !important;
+  }
+}

@@ -525,6 +525,7 @@ function applyMobileFiltersDrawer(){
   if (!filters || !mount || !fab || !drawer) return;
 
   if (isMob){
+    const toolbarMount = document.getElementById('mobileFiltersToolbarMount');
     // create placeholder at original location once
     if (!_filtersPlaceholder){
       _filtersPlaceholder = document.createElement("div");
@@ -534,6 +535,11 @@ function applyMobileFiltersDrawer(){
 
     if (!mount.contains(filters)){
       mount.appendChild(filters);
+    }
+
+    // Move the Filters button next to Sort on mobile
+    if (toolbarMount && !toolbarMount.contains(fab)){
+      toolbarMount.appendChild(fab);
     }
 
     fab.hidden = false;
@@ -577,7 +583,11 @@ function applyMobileFiltersDrawer(){
       _filtersPlaceholder = null;
     }
 
-    if (fab) fab.hidden = true;
+    if (fab){
+      fab.hidden = true;
+      // Restore fab to body so it doesn't stay in navbar on desktop
+      if (!document.body.contains(fab)) document.body.appendChild(fab);
+    }
     closeMobileFilters();
   }
 }
