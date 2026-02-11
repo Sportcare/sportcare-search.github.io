@@ -1,6 +1,9 @@
-# SportCare Search (Netlify Drop) – v3
-Upgrades included:
-- Show more / Show less for facets (when > 6 values)
-- Collapsible facet sections (accordion via <details>)
-- Pill bar above results with active filters + "Clear all filters"
-- Language toggle EN/ES and URL sync.
+# SportCare Search (Netlify Drop) – v4
+Added:
+- Selected filters summary in accordion headers (e.g., Type (2))
+- Small total count badge next to accordion titles (number of options)
+- Persist accordion open/closed state (URL + localStorage)
+- Results are hidden until the user types a search query
+
+URL examples:
+- ?q=bullet&lang=es&type=Sleeve|Guide&openSystem=1&openType=0

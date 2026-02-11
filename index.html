@@ -10,7 +10,7 @@
   <body>
     <header class="topbar">
       <div class="container topbar-inner">
-        <div class="brand"><img src="img/logo-sportcare-web.png" alt="Sportcare-logo" style="max-width: 70%;"></div>
+        <div class="brand"><img src="img/logo-sportcare-web.png" alt="" style="max-width: 70%; min-width: 100px;"></div>
 
         <div class="searchbox">
           <input id="q" type="search" placeholder="" />
@@ -34,19 +34,31 @@
           <button id="resetBtn" type="button" class="linkbtn"></button>
         </div>
 
-        <details class="facet acc" open>
+        <details class="facet acc" id="accSystem" open>
           <summary>
-            <span id="facetSystemTitle"></span>
-            <span class="chev">▾</span>
+            <div class="sum-left">
+              <span id="facetSystemTitle"></span>
+              <span id="facetSystemSelected" class="sum-selected"></span>
+            </div>
+            <div class="sum-right">
+              <span id="facetSystemTotal" class="sum-total"></span>
+              <span class="chev">▾</span>
+            </div>
           </summary>
           <div id="facetSystem" class="facet-list"></div>
           <button id="moreSystem" class="morebtn" type="button"></button>
         </details>
 
-        <details class="facet acc" open>
+        <details class="facet acc" id="accType" open>
           <summary>
-            <span id="facetTypeTitle"></span>
-            <span class="chev">▾</span>
+            <div class="sum-left">
+              <span id="facetTypeTitle"></span>
+              <span id="facetTypeSelected" class="sum-selected"></span>
+            </div>
+            <div class="sum-right">
+              <span id="facetTypeTotal" class="sum-total"></span>
+              <span class="chev">▾</span>
+            </div>
           </summary>
           <div id="facetType" class="facet-list"></div>
           <button id="moreType" class="morebtn" type="button"></button>

@@ -25,9 +25,19 @@ const elFiltersTitle = document.getElementById("filtersTitle");
 const elFacetSystemTitle = document.getElementById("facetSystemTitle");
 const elFacetTypeTitle = document.getElementById("facetTypeTitle");
 
+// accordion elements + header badges
+const accSystem = document.getElementById("accSystem");
+const accType = document.getElementById("accType");
+const elFacetSystemSelected = document.getElementById("facetSystemSelected");
+const elFacetTypeSelected = document.getElementById("facetTypeSelected");
+const elFacetSystemTotal = document.getElementById("facetSystemTotal");
+const elFacetTypeTotal = document.getElementById("facetTypeTotal");
+
+const STORAGE_KEY = "sportcare_search_v4";
+
 const I18N = {
   en: {
-    searchPlaceholder: "Search (e.g., bullet, cannula, 1055…)",
+    searchPlaceholder: "Type to search (e.g., bullet, cannula, 1055…)",
     clear: "Clear",
     filters: "Filters",
     reset: "Reset",
@@ -44,9 +54,11 @@ const I18N = {
     clearAll: "Clear all filters",
     searchPill: (q) => `Search: “${q}”`,
     remove: "Remove",
+    hint: "Start typing in the search bar to see results.",
+    selectedN: (n) => (n > 0 ? `(${n})` : ""),
   },
   es: {
-    searchPlaceholder: "Buscar (ej.: bullet, cannula, 1055…)",
+    searchPlaceholder: "Escribe para buscar (ej.: bullet, cannula, 1055…)",
     clear: "Limpiar",
     filters: "Filtros",
     reset: "Restablecer",
@@ -63,6 +75,8 @@ const I18N = {
     clearAll: "Quitar filtros",
     searchPill: (q) => `Búsqueda: “${q}”`,
     remove: "Quitar",
+    hint: "Empieza a escribir en la barra de búsqueda para ver resultados.",
+    selectedN: (n) => (n > 0 ? `(${n})` : ""),
   },
 };
 
@@ -117,19 +131,18 @@ function scoreItem(item, qNorm) {
 }
 
 function applyFilters() {
+  // IMPORTANT: don't show results until user searches
   const qNorm = normalize(state.q.trim());
+  if (!qNorm) return [];
+
   let items = ALL;
 
   if (state.systems.size) items = items.filter((x) => state.systems.has(x.system));
   if (state.types.size) items = items.filter((x) => state.types.has(x.type));
 
-  if (qNorm) {
-    items = items
-      .map((x) => ({ ...x, _score: scoreItem(x, qNorm) }))
-      .filter((x) => x._score > 0);
-  } else {
-    items = items.map((x) => ({ ...x, _score: 0 }));
-  }
+  items = items
+    .map((x) => ({ ...x, _score: scoreItem(x, qNorm) }))
+    .filter((x) => x._score > 0);
 
   if (state.sort === "az") items.sort((a, b) => a.description.localeCompare(b.description));
   else if (state.sort === "ref") items.sort((a, b) => String(a.ref_num).localeCompare(String(b.ref_num)));
@@ -207,17 +220,11 @@ function renderPillbar() {
   }
 
   for (const sys of [...state.systems]) {
-    pills.push({
-      label: `${t("system")}: ${sys}`,
-      clear: () => state.systems.delete(sys),
-    });
+    pills.push({ label: `${t("system")}: ${sys}`, clear: () => state.systems.delete(sys) });
   }
 
   for (const typ of [...state.types]) {
-    pills.push({
-      label: `${t("type")}: ${trType(typ)}`,
-      clear: () => state.types.delete(typ),
-    });
+    pills.push({ label: `${t("type")}: ${trType(typ)}`, clear: () => state.types.delete(typ) });
   }
 
   if (pills.length) {
@@ -258,6 +265,12 @@ function renderPillbar() {
 }
 
 function renderResults(items) {
+  if (!state.q.trim()) {
+    elCount.textContent = "";
+    elResults.innerHTML = `<div class="hint">${t("hint")}</div>`;
+    return;
+  }
+
   elCount.textContent = t("resultCount", items.length);
 
   elResults.innerHTML = "";
@@ -294,6 +307,33 @@ function applyI18nToUI() {
   elSort.querySelector('option[value="ref"]').textContent = t("sortRef");
 }
 
+function persistAccordions() {
+  try {
+    const payload = JSON.stringify({
+      openSystem: accSystem?.open ?? true,
+      openType: accType?.open ?? true,
+    });
+    localStorage.setItem(STORAGE_KEY, payload);
+  } catch (_) {}
+}
+
+function loadAccordionState(params) {
+  // priority: URL params -> localStorage -> default open
+  const urlSys = params.get("openSystem");
+  const urlType = params.get("openType");
+
+  let stored = null;
+  try {
+    stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+  } catch (_) {}
+
+  const openSystem = urlSys !== null ? urlSys === "1" : (stored?.openSystem ?? true);
+  const openType = urlType !== null ? urlType === "1" : (stored?.openType ?? true);
+
+  if (accSystem) accSystem.open = openSystem;
+  if (accType) accType.open = openType;
+}
+
 function syncUrl() {
   const params = new URLSearchParams();
   if (state.q) params.set("q", state.q);
@@ -301,6 +341,10 @@ function syncUrl() {
   if (state.types.size) params.set("type", [...state.types].join("|"));
   if (state.sort && state.sort !== "relevance") params.set("sort", state.sort);
   if (state.lang && state.lang !== "en") params.set("lang", state.lang);
+
+  // accordion state
+  if (accSystem) params.set("openSystem", accSystem.open ? "1" : "0");
+  if (accType) params.set("openType", accType.open ? "1" : "0");
 
   const qs = params.toString();
   const newUrl = qs ? `${location.pathname}?${qs}` : `${location.pathname}`;
@@ -321,11 +365,22 @@ function setupMoreButton(btn, total, shown, key) {
   };
 }
 
+function updateAccordionHeaderBadges(facetSystemsTotal, facetTypesTotal) {
+  // "Type (2)" and total options badge
+  elFacetSystemSelected.textContent = t("selectedN", state.systems.size);
+  elFacetTypeSelected.textContent = t("selectedN", state.types.size);
+
+  elFacetSystemTotal.textContent = String(facetSystemsTotal);
+  elFacetTypeTotal.textContent = String(facetTypesTotal);
+}
+
 function rerender() {
   renderPillbar();
 
+  // Facets: counts based on search-only base. If no search, show counts from ALL.
   const qNorm = normalize(state.q.trim());
   let base = ALL;
+
   if (qNorm) {
     base = base
       .map((x) => ({ ...x, _score: scoreItem(x, qNorm) }))
@@ -365,6 +420,8 @@ function rerender() {
   setupMoreButton(elMoreSystem, sysMeta.total, sysMeta.shownCount, "system");
   setupMoreButton(elMoreType, typMeta.total, typMeta.shownCount, "type");
 
+  updateAccordionHeaderBadges(sysMeta.total, typMeta.total);
+
   const items = applyFilters();
   renderResults(items);
 
@@ -390,6 +447,10 @@ async function init() {
   ALL = ALL.map((x) => ({ ...x, _searchNorm: normalize(`${x._search}`) }));
 
   const params = new URLSearchParams(location.search);
+
+  // accordion open/close state
+  loadAccordionState(params);
+
   state.q = params.get("q") || "";
   state.sort = params.get("sort") || "relevance";
   state.lang = (params.get("lang") || "en").toLowerCase();
@@ -404,6 +465,10 @@ async function init() {
 
   applyI18nToUI();
   rerender();
+
+  // persist accordion state on toggle
+  if (accSystem) accSystem.addEventListener("toggle", () => { persistAccordions(); syncUrl(); });
+  if (accType) accType.addEventListener("toggle", () => { persistAccordions(); syncUrl(); });
 }
 
 elQ.addEventListener("input", debounce(() => {

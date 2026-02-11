@@ -47,6 +47,22 @@ body{margin:0;font-family:var(--font);color:var(--text);background:var(--bg)}
 .acc[open] .chev{transform:rotate(180deg)}
 .chev{transition:120ms transform ease-in-out; color:var(--muted)}
 
+.sum-left{display:flex;align-items:center;gap:8px;min-width:0}
+.sum-right{display:flex;align-items:center;gap:10px}
+.sum-selected{
+  font-size:12px;
+  color:var(--muted);
+  font-weight:600;
+}
+.sum-total{
+  font-size:12px;
+  color:var(--muted);
+  border:1px solid var(--line);
+  padding:3px 8px;
+  border-radius:999px;
+  background:#fff;
+}
+
 .facet-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 
 .facet-row{
@@ -128,6 +144,13 @@ body{margin:0;font-family:var(--font);color:var(--text);background:var(--bg)}
 .result-title{font-weight:650;text-decoration:none;color:var(--text)}
 .result-meta{margin-top:6px;display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:13px}
 .kv strong{color:#222;font-weight:650}
+.hint{
+  padding:18px 12px;
+  color:var(--muted);
+  border:1px dashed var(--line);
+  border-radius:12px;
+  background:#fff;
+}
 
 @media (max-width: 980px){
   .layout{grid-template-columns:1fr}
