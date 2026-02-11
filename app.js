@@ -544,36 +544,30 @@ function applyMobileFiltersDrawer(){
     if (doneBtn) doneBtn.textContent = t("mobileDone");
     if (clearBtn) clearBtn.textContent = t("mobileClear");
 
-    // wire events once
-    if (!fab.dataset.bound){
-      fab.dataset.bound = "1";
-      fab.addEventListener("click", openMobileFilters);
+    // wire events (safe to re-assign)
+    fab.onclick = openMobileFilters;
+
+    if (overlay){
+      overlay.onclick = closeMobileFilters;
     }
-    if (overlay && !overlay.dataset.bound){
-      overlay.dataset.bound = "1";
-      overlay.addEventListener("click", closeMobileFilters);
+    if (closeBtn){
+      closeBtn.onclick = closeMobileFilters;
     }
-    if (closeBtn && !closeBtn.dataset.bound){
-      closeBtn.dataset.bound = "1";
-      closeBtn.addEventListener("click", closeMobileFilters);
+    if (doneBtn){
+      doneBtn.onclick = closeMobileFilters;
     }
-    if (doneBtn && !doneBtn.dataset.bound){
-      doneBtn.dataset.bound = "1";
-      doneBtn.addEventListener("click", closeMobileFilters);
-    }
-    if (clearBtn && !clearBtn.dataset.bound){
-      clearBtn.dataset.bound = "1";
-      clearBtn.addEventListener("click", () => {
-        // clear selections and rerender
+    if (clearBtn){
+      clearBtn.onclick = () => {
         state.systems.clear();
         state.types.clear();
         syncUrl();
         rerender();
         closeMobileFilters();
-      });
+      };
     }
 
     // keep drawer closed by default
+
     closeMobileFilters();
   } else {
     // restore filters to original spot

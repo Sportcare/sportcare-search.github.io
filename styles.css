@@ -839,3 +839,25 @@ label.facet-row{
     display:block !important;
   }
 }
+
+
+/* ===== Mobile drawer footer usability fixes ===== */
+@media (max-width: 900px){
+  .mobile-drawer-foot{
+    position: sticky;
+    bottom: 0;
+    z-index: 120;
+  }
+
+  .mobile-drawer-foot .linkbtn,
+  .mobile-drawer-foot .morebtn{
+    padding: 0.55rem 1.0rem !important;
+    height: 44px;
+    justify-content: center;
+  }
+
+  /* Ensure drawer body doesn't cover footer */
+  .mobile-drawer-body{
+    padding-bottom: 18px;
+  }
+}
