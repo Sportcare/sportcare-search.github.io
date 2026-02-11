@@ -386,3 +386,67 @@ input[type="checkbox"]:checked + .checkmark {
 .facet input[type="checkbox"]:hover + .checkmark {
   border-color: #FFC400 !important;
 }
+
+
+/* ===== Sportcare Yellow unification ===== */
+:root{
+  --sportcare-yellow: #FFC400;
+}
+
+/* Checkbox base background */
+.facet-row input[type="checkbox"]{
+  background:#F0F0F0 !important;
+}
+
+/* Checkmark fill */
+.facet-row input[type="checkbox"]::after{
+  background: var(--sportcare-yellow) !important;
+}
+
+/* Checked border + focus ring */
+.facet-row input[type="checkbox"]:checked{
+  border-color: var(--sportcare-yellow) !important;
+  box-shadow: 0 0 0 3px rgba(255,196,0,.18) !important;
+}
+
+/* Any other blue accents we used earlier (if present) */
+a:focus, button:focus, select:focus, input:focus{
+  box-shadow:none !important;
+}
+
+
+/* Hint background */
+.hint{
+  background:#F0F0F0 !important;
+}
+
+
+/* Pill buttons text tone */
+.morebtn,
+.searchbox button,
+#langSelect,
+#sort,
+.linkbtn{
+  color:#0a0a0a99 !important;
+}
+
+/* Also the dropdown arrow color */
+#langSelect,
+#sort{
+  background-image:
+    linear-gradient(45deg, transparent 50%, #0a0a0a99 50%),
+    linear-gradient(135deg, #0a0a0a99 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent) !important;
+}
+
+
+/* Facet option boxes background */
+label.facet-row{
+  background:#F0F0F0 !important;
+}
+
+
+/* Filters title regular weight */
+.filters h2{
+  font-weight:400 !important;
+}

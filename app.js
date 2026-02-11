@@ -39,7 +39,7 @@ const I18N = {
   en: {
     searchPlaceholder: "Type to search (e.g., SKU, retroknife, canulla, 1055...)",
     clear: "Clear",
-    filters: "Filters",
+    filters: "Filter by:",
     reset: "Reset",
     system: "System",
     type: "Type",
@@ -60,7 +60,7 @@ const I18N = {
   es: {
     searchPlaceholder: "Escribe para buscar (ej.: bullet, cannula, 1055…)",
     clear: "Limpiar",
-    filters: "Filtros",
+    filters: "Filtrar por:",
     reset: "Restablecer",
     system: "Sistema",
     type: "Tipo",
