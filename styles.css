@@ -360,9 +360,29 @@ body{ background: var(--bgPage); }
 }
 
 
-/* Facet box background similar to Expert ACL */
-.acc,
-.facet,
-.filters {
+
+
+/* Corrected facet row background (only the option boxes) */
+label.facet-row {
   background: #F0F0F0 !important;
+  border-radius: 10px;
+  padding: 6px 8px;
+}
+
+/* Keep filters panel background unchanged (restore) */
+aside.filters {
+  background: inherit !important;
+}
+
+
+/* Checkbox active state yellow instead of blue */
+.facet input[type="checkbox"]:checked + .checkmark,
+input[type="checkbox"]:checked + .checkmark {
+  background-color: #FFC400 !important;
+  border-color: #FFC400 !important;
+}
+
+/* Also for focus/hover states */
+.facet input[type="checkbox"]:hover + .checkmark {
+  border-color: #FFC400 !important;
 }
