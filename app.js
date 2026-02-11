@@ -40,6 +40,10 @@ const I18N = {
     searchPlaceholder: "Type to search (e.g., SKU, retroknife, canulla, 1055...)",
     clear: "Clear",
     filters: "Filter by:",
+    mobileFilters: "Filters",
+    mobileDone: "Done",
+    mobileClose: "Close",
+    mobileClear: "Clear",
     reset: "Reset",
     system: "System",
     type: "Type",
@@ -61,6 +65,10 @@ const I18N = {
     searchPlaceholder: "Escribe para buscar (ej.: bullet, cannula, 1055…)",
     clear: "Limpiar",
     filters: "Filtrar por:",
+    mobileFilters: "Filtros",
+    mobileDone: "Listo",
+    mobileClose: "Cerrar",
+    mobileClear: "Quitar",
     reset: "Restablecer",
     system: "Sistema",
     type: "Tipo",
@@ -452,7 +460,9 @@ function rerender() {
   renderResults(items);
 
   renderPillbar();
+  updateMobileFiltersBadge();
 }
+
 
 function debounce(fn, ms = 150) {
   let tmr;
@@ -461,6 +471,123 @@ function debounce(fn, ms = 150) {
     tmr = setTimeout(() => fn(...args), ms);
   };
 }
+
+function isMobileDrawerViewport(){
+  return window.matchMedia && window.matchMedia("(max-width: 900px)").matches;
+}
+
+let _filtersPlaceholder = null;
+
+function updateMobileFiltersBadge(){
+  const fab = document.getElementById("mobileFiltersFab");
+  const countEl = document.getElementById("mobileFiltersCount");
+  const labelEl = document.querySelector("#mobileFiltersFab .mobile-fab-label");
+  if (!fab) return;
+
+  const n = (state.systems?.size || 0) + (state.types?.size || 0);
+  if (countEl){
+    countEl.textContent = String(n);
+    countEl.hidden = n === 0;
+  }
+  if (labelEl){
+    labelEl.textContent = t("mobileFilters");
+  }
+}
+
+function openMobileFilters(){
+  const drawer = document.getElementById("mobileFiltersDrawer");
+  const overlay = document.getElementById("mobileFiltersOverlay");
+  if (drawer) drawer.hidden = false;
+  if (overlay) overlay.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function closeMobileFilters(){
+  const drawer = document.getElementById("mobileFiltersDrawer");
+  const overlay = document.getElementById("mobileFiltersOverlay");
+  if (drawer) drawer.hidden = true;
+  if (overlay) overlay.hidden = true;
+  document.body.style.overflow = "";
+}
+
+function applyMobileFiltersDrawer(){
+  const isMob = isMobileDrawerViewport();
+
+  const fab = document.getElementById("mobileFiltersFab");
+  const drawer = document.getElementById("mobileFiltersDrawer");
+  const overlay = document.getElementById("mobileFiltersOverlay");
+  const mount = document.getElementById("mobileFiltersMount");
+  const filters = document.querySelector("aside.filters");
+  const closeBtn = document.getElementById("mobileFiltersClose");
+  const doneBtn = document.getElementById("mobileFiltersApply");
+  const clearBtn = document.getElementById("mobileFiltersClear");
+
+  if (!filters || !mount || !fab || !drawer) return;
+
+  if (isMob){
+    // create placeholder at original location once
+    if (!_filtersPlaceholder){
+      _filtersPlaceholder = document.createElement("div");
+      _filtersPlaceholder.id = "filtersPlaceholder";
+      filters.parentElement.insertBefore(_filtersPlaceholder, filters);
+    }
+
+    if (!mount.contains(filters)){
+      mount.appendChild(filters);
+    }
+
+    fab.hidden = false;
+    // labels
+    const title = drawer.querySelector(".mobile-drawer-title");
+    if (title) title.textContent = t("filters");
+    if (closeBtn) closeBtn.textContent = t("mobileClose");
+    if (doneBtn) doneBtn.textContent = t("mobileDone");
+    if (clearBtn) clearBtn.textContent = t("mobileClear");
+
+    // wire events once
+    if (!fab.dataset.bound){
+      fab.dataset.bound = "1";
+      fab.addEventListener("click", openMobileFilters);
+    }
+    if (overlay && !overlay.dataset.bound){
+      overlay.dataset.bound = "1";
+      overlay.addEventListener("click", closeMobileFilters);
+    }
+    if (closeBtn && !closeBtn.dataset.bound){
+      closeBtn.dataset.bound = "1";
+      closeBtn.addEventListener("click", closeMobileFilters);
+    }
+    if (doneBtn && !doneBtn.dataset.bound){
+      doneBtn.dataset.bound = "1";
+      doneBtn.addEventListener("click", closeMobileFilters);
+    }
+    if (clearBtn && !clearBtn.dataset.bound){
+      clearBtn.dataset.bound = "1";
+      clearBtn.addEventListener("click", () => {
+        // clear selections and rerender
+        state.systems.clear();
+        state.types.clear();
+        syncUrl();
+        rerender();
+        closeMobileFilters();
+      });
+    }
+
+    // keep drawer closed by default
+    closeMobileFilters();
+  } else {
+    // restore filters to original spot
+    if (_filtersPlaceholder && _filtersPlaceholder.parentElement){
+      _filtersPlaceholder.parentElement.insertBefore(filters, _filtersPlaceholder);
+      _filtersPlaceholder.remove();
+      _filtersPlaceholder = null;
+    }
+
+    if (fab) fab.hidden = true;
+    closeMobileFilters();
+  }
+}
+
 
 // --- Mobile-only: move searchbox out of navbar into main layout ---
 function isMobileViewport(){
@@ -530,6 +657,8 @@ async function init() {
   elLang.value = state.lang;
 
   applyI18nToUI();
+  applyMobileFiltersDrawer();
+  window.addEventListener('resize', debounce(applyMobileFiltersDrawer, 150));
   applyMobileSearchPlacement();
   window.addEventListener('resize', debounce(applyMobileSearchPlacement, 150));
   rerender();
@@ -570,6 +699,8 @@ elSort.addEventListener("change", () => {
 elLang.addEventListener("change", () => {
   state.lang = elLang.value;
   applyI18nToUI();
+  applyMobileFiltersDrawer();
+  window.addEventListener('resize', debounce(applyMobileFiltersDrawer, 150));
   applyMobileSearchPlacement();
   window.addEventListener('resize', debounce(applyMobileSearchPlacement, 150));
   syncUrl();

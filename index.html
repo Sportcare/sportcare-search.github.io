@@ -106,5 +106,28 @@
     </div>
   </div>
 <script src="./app.js"></script>
-  </body>
+  
+  <!-- Mobile Filters Drawer (mobile-only) -->
+  <button id="mobileFiltersFab" class="mobile-fab" type="button" hidden>
+    <span class="mobile-fab-label">Filters</span>
+    <span id="mobileFiltersCount" class="mobile-fab-count" hidden>0</span>
+  </button>
+
+  <div id="mobileFiltersOverlay" class="mobile-overlay" hidden></div>
+
+  <div id="mobileFiltersDrawer" class="mobile-drawer" hidden>
+    <div class="mobile-drawer-head">
+      <div class="mobile-drawer-title">Filter by:</div>
+      <button id="mobileFiltersClose" class="mobile-drawer-close" type="button">Close</button>
+    </div>
+
+    <div id="mobileFiltersMount" class="mobile-drawer-body"></div>
+
+    <div class="mobile-drawer-foot">
+      <button id="mobileFiltersClear" class="linkbtn" type="button">Clear</button>
+      <button id="mobileFiltersApply" class="morebtn" type="button">Done</button>
+    </div>
+  </div>
+
+</body>
 </html>
