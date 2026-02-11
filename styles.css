@@ -892,3 +892,28 @@ label.facet-row{
     max-width: 240px;
   }
 }
+
+
+
+/* ===== Place Filters button inline next to Sort on mobile ===== */
+@media (max-width: 900px){
+  /* Disable floating FAB positioning */
+  .mobile-fab{
+    position: static !important;
+    margin-left: 8px;
+    box-shadow: none;
+  }
+
+  /* Inline container next to sort/lang controls */
+  .mobile-filters-inline{
+    display:inline-flex;
+    align-items:center;
+  }
+
+  /* Ensure sort + filters stay on same row */
+  .lang{
+    display:flex !important;
+    align-items:center !important;
+    gap:8px;
+  }
+}
