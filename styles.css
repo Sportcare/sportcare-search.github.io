@@ -625,3 +625,44 @@ label.facet-row{
     order:4 !important;
   }
 }
+
+
+
+/* ===== Mobile: move search outside nav + overflow fix (no desktop impact) ===== */
+@media (max-width: 768px){
+  html, body{
+    overflow-x: hidden;
+  }
+
+  .topbar-inner{
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .mobile-search-mount{
+    width: 100%;
+  }
+  .mobile-search-mount .searchbox{
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .searchbox input{
+    min-width: 0;
+    width: 100%;
+  }
+  .searchbox button,
+  #langSelect,
+  #sort,
+  .morebtn,
+  .linkbtn{
+    max-width: 100%;
+  }
+
+  .lang{
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}

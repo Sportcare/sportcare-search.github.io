@@ -462,6 +462,38 @@ function debounce(fn, ms = 150) {
   };
 }
 
+// --- Mobile-only: move searchbox out of navbar into main layout ---
+function isMobileViewport(){
+  return window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
+}
+
+let _searchboxPlaceholder = null;
+let _searchboxOriginalParent = null;
+
+function applyMobileSearchPlacement(){
+  const mount = document.getElementById("mobileSearchMount");
+  const searchbox = document.querySelector(".searchbox");
+  if (!mount || !searchbox) return;
+
+  if (!_searchboxPlaceholder){
+    _searchboxPlaceholder = document.createElement("div");
+    _searchboxPlaceholder.id = "searchboxPlaceholder";
+    _searchboxOriginalParent = searchbox.parentElement;
+    _searchboxOriginalParent.insertBefore(_searchboxPlaceholder, searchbox);
+  }
+
+  if (isMobileViewport()){
+    if (!mount.contains(searchbox)){
+      mount.appendChild(searchbox);
+    }
+  } else {
+    if (_searchboxPlaceholder && _searchboxPlaceholder.parentElement && !_searchboxPlaceholder.parentElement.contains(searchbox)){
+      _searchboxPlaceholder.parentElement.insertBefore(searchbox, _searchboxPlaceholder);
+    }
+  }
+}
+
+
 function parseMulti(paramVal) {
   if (!paramVal) return [];
   return String(paramVal).split("|").map((s) => s.trim()).filter(Boolean);
@@ -490,6 +522,8 @@ async function init() {
   elLang.value = state.lang;
 
   applyI18nToUI();
+  applyMobileSearchPlacement();
+  window.addEventListener('resize', debounce(applyMobileSearchPlacement, 150));
   rerender();
 
   // persist accordion state on toggle
@@ -528,6 +562,8 @@ elSort.addEventListener("change", () => {
 elLang.addEventListener("change", () => {
   state.lang = elLang.value;
   applyI18nToUI();
+  applyMobileSearchPlacement();
+  window.addEventListener('resize', debounce(applyMobileSearchPlacement, 150));
   syncUrl();
   rerender();
 });
