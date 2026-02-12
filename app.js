@@ -59,6 +59,9 @@ const I18N = {
     searchPill: (q) => `Search: “${q}”`,
     remove: "Remove",
     hint: "Start typing in the search bar to see results.",
+    brochureTitle: "Looking for more information?",
+    brochureDescHtml: "Explore our <strong>Products Catalog</strong> for detailed technical data, sizes, and configurations.",
+    brochureBtn: "View Products Catalog",
     selectedN: (n) => (n > 0 ? `(${n})` : ""),
   },
   es: {
@@ -84,6 +87,9 @@ const I18N = {
     searchPill: (q) => `Búsqueda: “${q}”`,
     remove: "Quitar",
     hint: "Empieza a escribir en la barra de búsqueda para ver resultados.",
+    brochureTitle: "¿Buscas más información?",
+    brochureDescHtml: "Explora nuestro <strong>Catálogo de productos</strong> para datos técnicos detallados, medidas y configuraciones.",
+    brochureBtn: "Ver catálogo de productos",
     selectedN: (n) => (n > 0 ? `(${n})` : ""),
   },
 };
@@ -337,6 +343,14 @@ function renderResults(items) {
 }
 
 function applyI18nToUI() {
+  // Brochure footer translations
+  const bt = document.getElementById("brochureTitle");
+  const bd = document.getElementById("brochureDesc");
+  const bb = document.getElementById("brochureBtn");
+  if (bt) bt.textContent = t("brochureTitle");
+  if (bd) bd.innerHTML = t("brochureDescHtml");
+  if (bb) bb.textContent = t("brochureBtn");
+
   elQ.placeholder = t("searchPlaceholder");
   elClear.textContent = t("clear");
   elFiltersTitle.textContent = t("filters");
