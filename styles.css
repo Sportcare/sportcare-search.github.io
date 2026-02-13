@@ -1044,3 +1044,18 @@ button#mobileFiltersApply.morebtn{
 .kv-ref .ref-val{ white-space:nowrap; }
 
 .result-meta .kv{display:inline-flex;align-items:center;gap:6px;}
+
+
+/* ===== Result title/meta spacing ===== */
+.result-info{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.result-title{
+  margin-bottom: 8px;
+  line-height: 1.25;
+}
+.result-meta{
+  line-height: 1.4;
+}
