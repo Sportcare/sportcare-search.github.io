@@ -346,7 +346,10 @@ function renderResults(items) {
     `;
     elResults.appendChild(row);
   }
+  // keyboard nav: reset active when results change
+  clearKbActive();
 }
+
 
 function applyI18nToUI() {
   // Brochure footer translations
@@ -791,3 +794,70 @@ if (document && !document.__pvCopyBound){
   document.addEventListener("click", handleCopyClick);
   document.__pvCopyBound = true;
 }
+
+
+/* ===== Keyboard navigation (↑ ↓ + Enter to open result) ===== */
+let kbIndex = -1;
+
+function getResultEls(){
+  return Array.from(elResults?.querySelectorAll("article.result") || []);
+}
+function setKbActive(index){
+  const els = getResultEls();
+  els.forEach(e => e.classList.remove("kb-active"));
+  if (!els.length){
+    kbIndex = -1;
+    return;
+  }
+  if (index < 0) index = 0;
+  if (index >= els.length) index = els.length - 1;
+  kbIndex = index;
+  const el = els[kbIndex];
+  el.classList.add("kb-active");
+  try{ el.scrollIntoView({block:"nearest"}); }catch(_){}
+}
+function clearKbActive(){
+  kbIndex = -1;
+  getResultEls().forEach(e => e.classList.remove("kb-active"));
+}
+
+function openKbActive(){
+  const els = getResultEls();
+  if (kbIndex < 0 || kbIndex >= els.length) return;
+  els[kbIndex].click();
+}
+
+function handleKbNav(e){
+  // only when focus is on the search input OR user is interacting with results area
+  const isTypingInSearch = document.activeElement === elQ;
+  const els = getResultEls();
+  if (!els.length) return;
+
+  if (!isTypingInSearch && !document.activeElement?.closest?.("#resultsList")) return;
+
+  if (e.key === "ArrowDown"){
+    e.preventDefault();
+    if (kbIndex === -1) setKbActive(0);
+    else setKbActive(kbIndex + 1);
+  } else if (e.key === "ArrowUp"){
+    e.preventDefault();
+    if (kbIndex === -1) setKbActive(0);
+    else setKbActive(kbIndex - 1);
+  } else if (e.key === "Enter"){
+    if (kbIndex !== -1){
+      e.preventDefault();
+      openKbActive();
+    }
+  } else if (e.key === "Escape"){
+    // just clear highlight, do not clear query
+    clearKbActive();
+  }
+}
+
+// bind once
+if (!window.__kbNavBound){
+  document.addEventListener("keydown", handleKbNav);
+  window.__kbNavBound = true;
+}
+
+// reset kb selection when results re-render (hook into renderResults)
