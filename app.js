@@ -65,6 +65,8 @@ const I18N = {
     selectedN: (n) => (n > 0 ? `(${n})` : ""),
     copy: "Copy",
     copied: "Copied",
+    refCopied: "Ref copied",
+
 
   },
   es: {
@@ -96,6 +98,8 @@ const I18N = {
     selectedN: (n) => (n > 0 ? `(${n})` : ""),
     copy: "Copiar",
     copied: "Copiado",
+    refCopied: "Ref copiada",
+
 
   },
 };
@@ -753,7 +757,7 @@ function handleCopyClick(e){
     const icon = btn.querySelector("svg");
     const prevIcon = icon ? icon.outerHTML : "";
     if (icon) icon.outerHTML = `<svg viewBox='0 0 24 24' aria-hidden='true'><path fill='currentColor' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/></svg>`;
-    if (label) label.textContent = t("copied");
+    if (label) label.textContent = t("refCopied");
     setTimeout(() => {
       btn.classList.remove("pv-copied");
       const curIcon = btn.querySelector("svg");
