@@ -223,6 +223,19 @@ body{ background: var(--bgPage); }
   gap:14px;
   align-items:flex-start;
 }
+
+/* ===== Result hover (desktop UX like Tauri) ===== */
+.result{
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  border-radius: 16px;
+  cursor: pointer;
+}
+.result:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+  background-color: rgba(255,255,255,0.85);
+}
+
 .result-thumb{
   width:64px;
   height:64px;
