@@ -1,3 +1,28 @@
+
+
+function escapeRegExp(s){
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getQueryTokens(q){
+  return (q || "")
+    .trim()
+    .split(/[^A-Za-z0-9]+/)
+    .filter(Boolean)
+    .filter(t => t.length >= 2)
+    .slice(0, 8);
+}
+
+// Escapes text AND wraps matched tokens with <span class="hl">
+function highlightHtml(text, q){
+  const safe = escapeHtml(String(text ?? ""));
+  const tokens = getQueryTokens(q);
+  if (!tokens.length) return safe;
+
+  // Build one regex for all tokens
+  const rx = new RegExp("(" + tokens.map(escapeRegExp).join("|") + ")", "gi");
+  return safe.replace(rx, '<span class="hl">$1</span>');
+}
 let ALL = [];
 let state = {
   q: "",
@@ -338,7 +363,7 @@ function renderResults(items) {
       <div class="result-body">
         <a class="result-title" href="#" onclick="return false;">${it.description}</a>
         <div class="result-meta">
-          <span class="kv kv-ref"><strong>${t("metaRef")}:</strong> <span class="ref-val">${it.ref_num}</span> <button class="pv-copy" type="button" data-copy="${it.ref_num}" aria-label="Copy ref"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 18H8V7h11v16z"/></svg><span>${t("copy")}</span></button></span>
+          <span class="kv kv-ref"><strong>${t("metaRef")}:</strong> <span class="ref-val">${highlightHtml(it.ref_num, state.q)}</span> <button class="pv-copy" type="button" data-copy="${it.ref_num}" aria-label="Copy ref"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 18H8V7h11v16z"/></svg><span>${t("copy")}</span></button></span>
           <span class="kv"><strong>${t("system")}:</strong> ${displaySystemName(it.system)}</span>
           <span class="kv"><strong>${t("type")}:</strong> ${trType(it.type)}</span>
         </div>
@@ -346,10 +371,7 @@ function renderResults(items) {
     `;
     elResults.appendChild(row);
   }
-  // keyboard nav: reset active when results change
-  clearKbActive();
 }
-
 
 function applyI18nToUI() {
   // Brochure footer translations
@@ -794,70 +816,3 @@ if (document && !document.__pvCopyBound){
   document.addEventListener("click", handleCopyClick);
   document.__pvCopyBound = true;
 }
-
-
-/* ===== Keyboard navigation (↑ ↓ + Enter to open result) ===== */
-let kbIndex = -1;
-
-function getResultEls(){
-  return Array.from(elResults?.querySelectorAll("article.result") || []);
-}
-function setKbActive(index){
-  const els = getResultEls();
-  els.forEach(e => e.classList.remove("kb-active"));
-  if (!els.length){
-    kbIndex = -1;
-    return;
-  }
-  if (index < 0) index = 0;
-  if (index >= els.length) index = els.length - 1;
-  kbIndex = index;
-  const el = els[kbIndex];
-  el.classList.add("kb-active");
-  try{ el.scrollIntoView({block:"nearest"}); }catch(_){}
-}
-function clearKbActive(){
-  kbIndex = -1;
-  getResultEls().forEach(e => e.classList.remove("kb-active"));
-}
-
-function openKbActive(){
-  const els = getResultEls();
-  if (kbIndex < 0 || kbIndex >= els.length) return;
-  els[kbIndex].click();
-}
-
-function handleKbNav(e){
-  // only when focus is on the search input OR user is interacting with results area
-  const isTypingInSearch = document.activeElement === elQ;
-  const els = getResultEls();
-  if (!els.length) return;
-
-  if (!isTypingInSearch && !document.activeElement?.closest?.("#resultsList")) return;
-
-  if (e.key === "ArrowDown"){
-    e.preventDefault();
-    if (kbIndex === -1) setKbActive(0);
-    else setKbActive(kbIndex + 1);
-  } else if (e.key === "ArrowUp"){
-    e.preventDefault();
-    if (kbIndex === -1) setKbActive(0);
-    else setKbActive(kbIndex - 1);
-  } else if (e.key === "Enter"){
-    if (kbIndex !== -1){
-      e.preventDefault();
-      openKbActive();
-    }
-  } else if (e.key === "Escape"){
-    // just clear highlight, do not clear query
-    clearKbActive();
-  }
-}
-
-// bind once
-if (!window.__kbNavBound){
-  document.addEventListener("keydown", handleKbNav);
-  window.__kbNavBound = true;
-}
-
-// reset kb selection when results re-render (hook into renderResults)
