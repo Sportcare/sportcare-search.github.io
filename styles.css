@@ -1003,3 +1003,31 @@ label.facet-row{
 button#mobileFiltersApply.morebtn{
   margin-top: 0 !important;
 }
+
+
+/* ===== Copy ref button (matches desktop app style) ===== */
+.pv-copy{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 0;
+  background: rgba(10,10,10,0.08);
+  color:#222222;
+  font-family:"elza-text", sans-serif;
+  font-weight:600;
+  cursor:pointer;
+  margin-left: 8px;
+}
+.pv-copy svg{ width: 16px; height: 16px; }
+.pv-copy:hover{
+  background: rgba(10,10,10,0.10);
+}
+.pv-copy:focus{ outline:none; }
+.pv-copy:focus-visible{ box-shadow: 0 0 0 3px rgba(255,196,0,0.45); }
+.pv-copied{
+  background: rgba(255,196,0,0.35) !important;
+}
+.kv-ref{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.kv-ref .ref-val{ white-space:nowrap; }

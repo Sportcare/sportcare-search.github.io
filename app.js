@@ -63,6 +63,9 @@ const I18N = {
     brochureDescHtml: "Explore our <strong>Products Catalog</strong> for detailed technical data, sizes, and configurations.",
     brochureBtn: "View Products Catalog",
     selectedN: (n) => (n > 0 ? `(${n})` : ""),
+    copy: "Copy",
+    copied: "Copied",
+
   },
   es: {
     searchPlaceholder: "Escribe para buscar (ej.: bullet, cannula, 1055…)",
@@ -91,6 +94,9 @@ const I18N = {
     brochureDescHtml: "Explora nuestro <strong>Catálogo de productos</strong> para datos técnicos detallados, medidas y configuraciones.",
     brochureBtn: "Ver catálogo de productos",
     selectedN: (n) => (n > 0 ? `(${n})` : ""),
+    copy: "Copiar",
+    copied: "Copiado",
+
   },
 };
 
@@ -332,7 +338,7 @@ function renderResults(items) {
       <div class="result-body">
         <a class="result-title" href="#" onclick="return false;">${it.description}</a>
         <div class="result-meta">
-          <span class="kv"><strong>${t("metaRef")}:</strong> ${it.ref_num}</span>
+          <span class="kv kv-ref"><strong>${t("metaRef")}:</strong> <span class="ref-val">${it.ref_num}</span> <button class="pv-copy" type="button" data-copy="${it.ref_num}" aria-label="Copy ref"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 18H8V7h11v16z"/></svg><span>${t("copy")}</span></button></span>
           <span class="kv"><strong>${t("system")}:</strong> ${displaySystemName(it.system)}</span>
           <span class="kv"><strong>${t("type")}:</strong> ${trType(it.type)}</span>
         </div>
@@ -733,3 +739,55 @@ elLang.addEventListener("change", () => {
 });
 
 init();
+
+
+function handleCopyClick(e){
+  const btn = e.target && e.target.closest ? e.target.closest(".pv-copy") : null;
+  if (!btn) return;
+  const text = btn.getAttribute("data-copy") || "";
+  if (!text) return;
+
+  const doSuccess = () => {
+    btn.classList.add("pv-copied");
+    const label = btn.querySelector("span:last-child");
+    const icon = btn.querySelector("svg");
+    const prevIcon = icon ? icon.outerHTML : "";
+    if (icon) icon.outerHTML = `<svg viewBox='0 0 24 24' aria-hidden='true'><path fill='currentColor' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/></svg>`;
+    if (label) label.textContent = t("copied");
+    setTimeout(() => {
+      btn.classList.remove("pv-copied");
+      const curIcon = btn.querySelector("svg");
+      if (curIcon && prevIcon) curIcon.outerHTML = prevIcon;
+      if (label) label.textContent = t("copy");
+    }, 900);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(doSuccess).catch(() => {
+      try{
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        doSuccess();
+      }catch(_){}
+    });
+  } else {
+    try{
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      doSuccess();
+    }catch(_){}
+  }
+}
+
+if (document && !document.__pvCopyBound){
+  document.addEventListener("click", handleCopyClick);
+  document.__pvCopyBound = true;
+}
