@@ -1,28 +1,3 @@
-
-
-function escapeRegExp(s){
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function getQueryTokens(q){
-  return (q || "")
-    .trim()
-    .split(/[^A-Za-z0-9]+/)
-    .filter(Boolean)
-    .filter(t => t.length >= 2)
-    .slice(0, 8);
-}
-
-// Escapes text AND wraps matched tokens with <span class="hl">
-function highlightHtml(text, q){
-  const safe = escapeHtml(String(text ?? ""));
-  const tokens = getQueryTokens(q);
-  if (!tokens.length) return safe;
-
-  // Build one regex for all tokens
-  const rx = new RegExp("(" + tokens.map(escapeRegExp).join("|") + ")", "gi");
-  return safe.replace(rx, '<span class="hl">$1</span>');
-}
 let ALL = [];
 let state = {
   q: "",
@@ -363,7 +338,7 @@ function renderResults(items) {
       <div class="result-body">
         <a class="result-title" href="#" onclick="return false;">${it.description}</a>
         <div class="result-meta">
-          <span class="kv kv-ref"><strong>${t("metaRef")}:</strong> <span class="ref-val">${highlightHtml(it.ref_num, state.q)}</span> <button class="pv-copy" type="button" data-copy="${it.ref_num}" aria-label="Copy ref"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 18H8V7h11v16z"/></svg><span>${t("copy")}</span></button></span>
+          <span class="kv kv-ref"><strong>${t("metaRef")}:</strong> <span class="ref-val">${it.ref_num}</span> <button class="pv-copy" type="button" data-copy="${it.ref_num}" aria-label="Copy ref"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 18H8V7h11v16z"/></svg><span>${t("copy")}</span></button></span>
           <span class="kv"><strong>${t("system")}:</strong> ${displaySystemName(it.system)}</span>
           <span class="kv"><strong>${t("type")}:</strong> ${trType(it.type)}</span>
         </div>

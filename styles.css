@@ -1059,11 +1059,3 @@ button#mobileFiltersApply.morebtn{
 .result-meta{
   line-height: 1.4;
 }
-
-
-/* ===== Matched text highlight ===== */
-.hl{
-  background: rgba(255,196,0,0.35);
-  border-radius: 8px;
-  padding: 0 4px;
-}
